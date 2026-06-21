@@ -29,7 +29,7 @@ StockInsight::StockInsight(QWidget* parent)
     exportBtn = new QPushButton("🖼️ Экспорт JPEG");
     clearBtn = new QPushButton("🗑️ Очистить");
 
-    QLineEdit* searchEdit = new QLineEdit();
+    searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
 
     buttonLayout->addWidget(loadBtn);
@@ -63,6 +63,7 @@ StockInsight::StockInsight(QWidget* parent)
 
     connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
+    connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
 }
 
 // ЗАГРУЗКА CSV
@@ -172,4 +173,32 @@ void StockInsight::clearTable()
 
     table->setRowCount(0);
     QMessageBox::information(this, "Готово", "Таблица очищена!");
+}
+
+// ПОИСК ПО ТАБЛИЦЕ 
+void StockInsight::onSearchTextChanged(const QString& text)
+{
+    // Если поле пустое — показываем все строки
+    if (text.isEmpty()) {
+        for (int row = 0; row < table->rowCount(); ++row) {
+            table->setRowHidden(row, false);
+        }
+        return;
+    }
+
+    // Ищем по всем строкам (по колонке "Товар" — индекс 0)
+    for (int row = 0; row < table->rowCount(); ++row) {
+        QTableWidgetItem* item = table->item(row, 0);
+        bool isMatch = false;
+
+        if (item) {
+            QString cellText = item->text();
+            if (cellText.contains(text, Qt::CaseInsensitive)) {
+                isMatch = true;
+            }
+        }
+
+        // Скрываем или показываем строку
+        table->setRowHidden(row, !isMatch);
+    }
 }
