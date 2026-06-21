@@ -17,6 +17,7 @@ private slots:
     void loadCSV();  // Загрузка CSV
     void clearTable();  // Очистка таблицы
     void onSearchTextChanged(const QString& text);  // Поиск по таблице
+    void logout();  // Выход
 
 private:
     QTableWidget* table;
@@ -24,6 +25,7 @@ private:
     QPushButton* saveBtn;
     QPushButton* exportBtn;
     QPushButton* clearBtn;
+    QPushButton* logoutBtn;
     QLineEdit* searchEdit;
     QString currentRole;
 };

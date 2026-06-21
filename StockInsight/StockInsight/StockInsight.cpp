@@ -28,6 +28,7 @@ StockInsight::StockInsight(QWidget* parent)
     saveBtn = new QPushButton("💾 Сохранить JSON");
     exportBtn = new QPushButton("🖼️ Экспорт JPEG");
     clearBtn = new QPushButton("🗑️ Очистить");
+    logoutBtn = new QPushButton("🚪 Выйти");
 
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
@@ -38,6 +39,7 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
+    buttonLayout->addWidget(logoutBtn);
 
     mainLayout->addLayout(buttonLayout);
 
@@ -64,6 +66,7 @@ StockInsight::StockInsight(QWidget* parent)
     connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
     connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
+    connect(logoutBtn, &QPushButton::clicked, this, &StockInsight::logout);
 }
 
 // ЗАГРУЗКА CSV
@@ -203,4 +206,9 @@ void StockInsight::onSearchTextChanged(const QString& text)
         // Скрываем или показываем строку
         table->setRowHidden(row, !isMatch);
     }
+}
+
+void StockInsight::logout()
+{
+    this->close();  // Закрывает главное окно
 }
