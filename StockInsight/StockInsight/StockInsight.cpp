@@ -11,6 +11,8 @@
 #include <QFile>
 #include <QTextStream>
 
+
+// КОНСТРУКТОР
 StockInsight::StockInsight(QWidget* parent)
     : QMainWindow(parent)
 {
@@ -25,6 +27,7 @@ StockInsight::StockInsight(QWidget* parent)
     loadBtn = new QPushButton("📂 Загрузить CSV");
     saveBtn = new QPushButton("💾 Сохранить JSON");
     exportBtn = new QPushButton("🖼️ Экспорт JPEG");
+    clearBtn = new QPushButton("🗑️ Очистить");
 
     QLineEdit* searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
@@ -32,6 +35,7 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addWidget(loadBtn);
     buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
+    buttonLayout->addWidget(clearBtn);
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
 
@@ -58,8 +62,10 @@ StockInsight::StockInsight(QWidget* parent)
     resize(1000, 700);
 
     connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);
+    connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
 }
 
+// ЗАГРУЗКА CSV
 void StockInsight::loadCSV()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Выберите CSV файл", "", "CSV файлы (*.csv);;Все файлы (*)");
@@ -138,6 +144,7 @@ void StockInsight::loadCSV()
     QMessageBox::information(this, "Готово", "Загружено " + QString::number(row) + " товаров!");
 }
 
+// УСТАНОВКА РОЛИ (блокировка кнопок)
 void StockInsight::setUserRole(const QString& role)
 {
     currentRole = role;
@@ -152,4 +159,17 @@ void StockInsight::setUserRole(const QString& role)
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
     }
+}
+
+// ОЧИСТКА ТАБЛИЦЫ (только для админа)
+void StockInsight::clearTable()
+{
+    if (currentRole != "admin") {
+        QMessageBox::warning(this, "Доступ запрещён",
+            "Только администратор может очищать таблицу!");
+        return;
+    }
+
+    table->setRowCount(0);
+    QMessageBox::information(this, "Готово", "Таблица очищена!");
 }
