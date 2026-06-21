@@ -44,7 +44,6 @@ StockInsight::StockInsight(QWidget* parent)
     table = new QTableWidget(0, 7);
     QStringList headers = { "Товар", "Категория", "Кол-во", "Цена зак.", "Цена прод.", "Дней", "Прибыль" };
     table->setHorizontalHeaderLabels(headers);
-    table->setAlternatingRowColors(true);
     mainLayout->addWidget(table);
 
     // --- Вкладки ---
@@ -100,6 +99,39 @@ void StockInsight::loadCSV()
             table->setItem(row, col, item);
         }
         row++;
+    }
+
+    // --- Чередование строк и подсветка текста ---
+    for (int r = 0; r < table->rowCount(); ++r) {
+        int quantity = table->item(r, 2)->text().toInt();
+        int days = table->item(r, 5)->text().toInt();
+
+        // Определяем цвет текста
+        QColor textColor;
+        if (quantity < 5) {
+            textColor = Qt::red;              // Дефицит
+        }
+        else if (days > 90) {
+            textColor = QColor(255, 165, 0);  // Залежалый (оранжевый)
+        }
+        else if (quantity > 20) {
+            textColor = Qt::darkGreen;        // Много товара (тёмно-зелёный)
+        }
+        else {
+            textColor = Qt::white;            // Обычный текст (белый)
+        }
+
+        // Чередование фона
+        QColor bgColor = (r % 2 == 0) ? QColor(50, 50, 50) : QColor(40, 40, 40);
+
+        // Применяем ко всей строке
+        for (int col = 0; col < table->columnCount(); ++col) {
+            QTableWidgetItem* item = table->item(r, col);
+            if (item) {
+                item->setForeground(textColor);   // Цвет текста
+                item->setBackground(bgColor);     // Чередование фона
+            }
+        }
     }
 
     file.close();
