@@ -154,23 +154,25 @@ void StockInsight::setUserRole(const QString& role)
         loadBtn->setEnabled(false);
         saveBtn->setEnabled(false);
         exportBtn->setEnabled(false);
+        clearBtn->setEnabled(false);
     }
-    else {
+    else if (role == "analyst") {
         loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
+        clearBtn->setEnabled(false);
+    }
+    else { // admin
+        loadBtn->setEnabled(true);
+        saveBtn->setEnabled(true);
+        exportBtn->setEnabled(true);
+        clearBtn->setEnabled(true);
     }
 }
 
 // ОЧИСТКА ТАБЛИЦЫ (только для админа)
 void StockInsight::clearTable()
 {
-    if (currentRole != "admin") {
-        QMessageBox::warning(this, "Доступ запрещён",
-            "Только администратор может очищать таблицу!");
-        return;
-    }
-
     table->setRowCount(0);
     QMessageBox::information(this, "Готово", "Таблица очищена!");
 }
