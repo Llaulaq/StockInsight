@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
         QString role = login.getRole();
 
         StockInsight w;
+        w.setUserRole(role);
         w.setWindowTitle("📊 StockInsight — Анализ склада [" + role + "]");
         w.show();
 

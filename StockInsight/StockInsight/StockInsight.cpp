@@ -22,9 +22,9 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель ---
     QHBoxLayout* buttonLayout = new QHBoxLayout();
 
-    QPushButton* loadBtn = new QPushButton("📂 Загрузить CSV");
-    QPushButton* saveBtn = new QPushButton("💾 Сохранить JSON");
-    QPushButton* exportBtn = new QPushButton("🖼️ Экспорт JPEG");
+    loadBtn = new QPushButton("📂 Загрузить CSV");
+    saveBtn = new QPushButton("💾 Сохранить JSON");
+    exportBtn = new QPushButton("🖼️ Экспорт JPEG");
 
     QLineEdit* searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
@@ -134,6 +134,22 @@ void StockInsight::loadCSV()
         }
     }
 
-    file.close();
+        file.close();
     QMessageBox::information(this, "Готово", "Загружено " + QString::number(row) + " товаров!");
+}
+
+void StockInsight::setUserRole(const QString& role)
+{
+    currentRole = role;
+
+    if (role == "guest") {
+        loadBtn->setEnabled(false);
+        saveBtn->setEnabled(false);
+        exportBtn->setEnabled(false);
+    }
+    else {
+        loadBtn->setEnabled(true);
+        saveBtn->setEnabled(true);
+        exportBtn->setEnabled(true);
+    }
 }
