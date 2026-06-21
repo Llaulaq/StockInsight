@@ -2,6 +2,8 @@
   Reading Qt configuration (C:/Qt/6.8.0/msvc2022_64/6.8.0/msvc2022_64/bin/qmake)
    Qt: 6.8.0
   LoginDialog.cpp
+  RegisterDialog.cpp
   main.cpp
   moc_LoginDialog.cpp
+  moc_RegisterDialog.cpp
   StockInsight.vcxproj -> D:\Dev\StockInsight\StockInsight\x64\Debug\StockInsight.exe

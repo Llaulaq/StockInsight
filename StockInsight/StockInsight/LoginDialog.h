@@ -14,11 +14,13 @@ public:
 
 private slots:
     void onLoginClicked();
+    void onRegisterClicked();
 
 private:
     QLineEdit* usernameEdit;
     QLineEdit* passwordEdit;
     QPushButton* loginButton;
+    QPushButton* registerButton;
     QPushButton* cancelButton;
     QLabel* statusLabel;
     QString role; // Хранит роль: admin, analyst, guest

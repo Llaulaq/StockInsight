@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "D:\\Dev\\StockInsight\\StockInsight\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\LoginDialog.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\LoginDialog.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -30,11 +30,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "main.cpp",
               "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\main.cpp",
               "RelativeDocumentMoniker": "StockInsight\\main.cpp",
@@ -47,26 +47,26 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "LoginDialog.cpp",
               "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.cpp",
               "RelativeDocumentMoniker": "StockInsight\\LoginDialog.cpp",
               "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.cpp",
               "RelativeToolTip": "StockInsight\\LoginDialog.cpp",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAAAEwAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAADAAAAAAAAAAAAAAADUAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-06-21T19:48:26.879Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "LoginDialog.h",
               "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.h",
               "RelativeDocumentMoniker": "StockInsight\\LoginDialog.h",
               "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.h",
               "RelativeToolTip": "StockInsight\\LoginDialog.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-06-21T19:47:34.72Z",
               "EditorCaption": ""

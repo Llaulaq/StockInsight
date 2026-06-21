@@ -1,4 +1,5 @@
 #include "LoginDialog.h"
+#include "RegisterDialog.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -7,11 +8,10 @@ LoginDialog::LoginDialog(QWidget* parent)
     : QDialog(parent), role("guest")
 {
     setWindowTitle("🔐 Авторизация");
-    resize(300, 180);
+    resize(300, 220);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-    // --- Поля ввода ---
     QLabel* userLabel = new QLabel("👤 Логин:");
     usernameEdit = new QLineEdit();
     usernameEdit->setPlaceholderText("Введите логин");
@@ -26,13 +26,14 @@ LoginDialog::LoginDialog(QWidget* parent)
 
     // --- Кнопки ---
     loginButton = new QPushButton("✅ Войти");
+    registerButton = new QPushButton("📝 Регистрация");
     cancelButton = new QPushButton("❌ Отмена");
 
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(loginButton);
+    buttonLayout->addWidget(registerButton);
     buttonLayout->addWidget(cancelButton);
 
-    // --- Собираем всё ---
     mainLayout->addWidget(userLabel);
     mainLayout->addWidget(usernameEdit);
     mainLayout->addWidget(passLabel);
@@ -40,8 +41,8 @@ LoginDialog::LoginDialog(QWidget* parent)
     mainLayout->addWidget(statusLabel);
     mainLayout->addLayout(buttonLayout);
 
-    // --- Подключаем кнопки ---
     connect(loginButton, &QPushButton::clicked, this, &LoginDialog::onLoginClicked);
+    connect(registerButton, &QPushButton::clicked, this, &LoginDialog::onRegisterClicked);
     connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
@@ -50,17 +51,18 @@ void LoginDialog::onLoginClicked()
     QString user = usernameEdit->text().trimmed();
     QString pass = passwordEdit->text().trimmed();
 
-    // --- Проверка логинов и паролей ---
-    if (user == "admin" && pass == "1234") {
-        role = "admin";
-        accept(); // Закрываем окно с успехом
-    }
-    else if (user == "analyst" && pass == "5678") {
-        role = "analyst";
-        accept();
-    }
-    else if (user == "guest" && pass == "0000") {
-        role = "guest";
+    // ВРЕМЕННАЯ БАЗА 
+    QMap<QString, QString> users;
+    QMap<QString, QString> passwords;
+    users["admin"] = "admin";
+    passwords["admin"] = "1234";
+    users["analyst"] = "analyst";
+    passwords["analyst"] = "5678";
+    users["guest"] = "guest";
+    passwords["guest"] = "0000";
+
+    if (users.contains(user) && passwords[user] == pass) {
+        role = users[user];
         accept();
     }
     else {
@@ -68,6 +70,21 @@ void LoginDialog::onLoginClicked()
         usernameEdit->clear();
         passwordEdit->clear();
         usernameEdit->setFocus();
+    }
+}
+
+void LoginDialog::onRegisterClicked()
+{
+    RegisterDialog reg;
+    if (reg.exec() == QDialog::Accepted) {
+        QString username = reg.getUsername();
+        QString password = reg.getPassword();
+        QString role = reg.getRole();
+
+        QMessageBox::information(this, "Регистрация успешна",
+            "Пользователь " + username + " зарегистрирован!\n"
+            "Роль: " + role + "\n\n"
+            "Теперь вы можете войти.");
     }
 }
 
