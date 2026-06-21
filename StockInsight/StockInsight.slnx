@@ -2,5 +2,5 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="StockInsight/StockInsight.vcxproj" />
+  <Project Path="StockInsight/StockInsight.vcxproj" Id="d39ee1ec-bfa5-4870-95ba-00a87f729788" />
 </Solution>

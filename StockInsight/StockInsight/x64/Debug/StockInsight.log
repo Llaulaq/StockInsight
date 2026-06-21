@@ -1,12 +1,7 @@
 ﻿   Qt/MSBuild: 3.5.0.0
   Reading Qt configuration (C:/Qt/6.8.0/msvc2022_64/6.8.0/msvc2022_64/bin/qmake)
    Qt: 6.8.0
-  uic StockInsight.ui
-  rcc StockInsight.qrc
-  moc StockInsight.h
-   RCC: Warning: No resources in 'D:\Dev\StockInsight\StockInsight\StockInsight\StockInsight.qrc'.
-  StockInsight.cpp
+  LoginDialog.cpp
   main.cpp
-  qrc_StockInsight.cpp
-  moc_StockInsight.cpp
+  moc_LoginDialog.cpp
   StockInsight.vcxproj -> D:\Dev\StockInsight\StockInsight\x64\Debug\StockInsight.exe
