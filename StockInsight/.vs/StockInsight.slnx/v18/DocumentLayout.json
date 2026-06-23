@@ -3,24 +3,16 @@
   "WorkspaceRootPath": "D:\\Dev\\StockInsight\\StockInsight\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\LoginDialog.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\LoginDialog.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\StockInsight.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\StockInsight.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\StockInsight.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{D39EE1EC-BFA5-4870-95BA-00A87F729788}|StockInsight\\StockInsight.vcxproj|solutionrelative:StockInsight\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,8 +22,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "StockInsight.h",
+              "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.h",
+              "RelativeDocumentMoniker": "StockInsight\\StockInsight.h",
+              "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.h",
+              "RelativeToolTip": "StockInsight\\StockInsight.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-06-22T21:14:27.554Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
@@ -40,62 +45,21 @@
               "RelativeDocumentMoniker": "StockInsight\\main.cpp",
               "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\main.cpp",
               "RelativeToolTip": "StockInsight\\main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-06-21T19:49:04.297Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "LoginDialog.cpp",
-              "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.cpp",
-              "RelativeDocumentMoniker": "StockInsight\\LoginDialog.cpp",
-              "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.cpp",
-              "RelativeToolTip": "StockInsight\\LoginDialog.cpp",
-              "ViewState": "AgIAADAAAAAAAAAAAAAAADUAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-06-21T19:48:26.879Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-22T21:13:35.378Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "LoginDialog.h",
-              "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.h",
-              "RelativeDocumentMoniker": "StockInsight\\LoginDialog.h",
-              "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\LoginDialog.h",
-              "RelativeToolTip": "StockInsight\\LoginDialog.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-06-21T19:47:34.72Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "StockInsight.h",
-              "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.h",
-              "RelativeDocumentMoniker": "StockInsight\\StockInsight.h",
-              "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.h",
-              "RelativeToolTip": "StockInsight\\StockInsight.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-06-21T19:42:56.275Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
               "Title": "StockInsight.cpp",
               "DocumentMoniker": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.cpp",
               "RelativeDocumentMoniker": "StockInsight\\StockInsight.cpp",
               "ToolTip": "D:\\Dev\\StockInsight\\StockInsight\\StockInsight\\StockInsight.cpp",
               "RelativeToolTip": "StockInsight\\StockInsight.cpp",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAAGoAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAACAAAAAAAAAAAAAiwOEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-06-21T18:47:05.603Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-22T20:57:29.744Z"
             }
           ]
         }

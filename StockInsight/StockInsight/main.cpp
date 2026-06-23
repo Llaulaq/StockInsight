@@ -1,5 +1,6 @@
 #include "StockInsight.h"
 #include "LoginDialog.h"
+#include <QtCharts>
 #include <QApplication>
 #include <QMessageBox>
 

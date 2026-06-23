@@ -10,3 +10,11 @@ Release/
 *.obj
 *.exe
 *.user
+
+.idea/
+
+
+.venv/
+
+pyproject.toml
+uv.lock

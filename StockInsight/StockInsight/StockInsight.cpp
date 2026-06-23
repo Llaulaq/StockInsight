@@ -1,4 +1,6 @@
 #include "StockInsight.h"
+#include <QProcess>
+#include <QDebug>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -10,11 +12,13 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
+#include <QPixmap>
+#include <QCoreApplication>
 
 
 // КОНСТРУКТОР
 StockInsight::StockInsight(QWidget* parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), currentCsvPath("")   // ← инициализируем
 {
     QWidget* central = new QWidget(this);
     setCentralWidget(central);
@@ -30,6 +34,8 @@ StockInsight::StockInsight(QWidget* parent)
     clearBtn = new QPushButton("🗑️ Очистить");
     logoutBtn = new QPushButton("🚪 Выйти");
 
+    QPushButton* testBtn = new QPushButton("📈 Показать графики");
+
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
 
@@ -37,6 +43,7 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
     buttonLayout->addWidget(clearBtn);
+    buttonLayout->addWidget(testBtn);
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
     buttonLayout->addWidget(logoutBtn);
@@ -52,12 +59,18 @@ StockInsight::StockInsight(QWidget* parent)
     table->setHorizontalHeaderLabels(headers);
     mainLayout->addWidget(table);
 
-    // --- Вкладки ---
-    QTabWidget* tabs = new QTabWidget();
-    tabs->addTab(new QWidget(), "📊 Остатки");
-    tabs->addTab(new QWidget(), "💰 Прибыль");
-    tabs->addTab(new QWidget(), "📈 Продажи");
-    tabs->addTab(new QWidget(), "⚠️ Залежалые");
+    // --- Вкладки для графиков (с layout'ами для картинок) ---
+    tabs = new QTabWidget();
+    chartLayouts.clear();
+
+    QStringList tabNames = { "📊 Остатки", "💰 Прибыль", "📈 Продажи", "⚠️ Залежалые" };
+    for (int i = 0; i < tabNames.size(); ++i) {
+        QWidget* page = new QWidget();
+        QVBoxLayout* layout = new QVBoxLayout(page);
+        page->setLayout(layout);
+        tabs->addTab(page, tabNames[i]);
+        chartLayouts.append(layout);
+    }
     mainLayout->addWidget(tabs);
 
     setWindowTitle("📊 StockInsight — Анализ склада");
@@ -67,6 +80,7 @@ StockInsight::StockInsight(QWidget* parent)
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
     connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
     connect(logoutBtn, &QPushButton::clicked, this, &StockInsight::logout);
+    connect(testBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
 }
 
 // ЗАГРУЗКА CSV
@@ -77,6 +91,8 @@ void StockInsight::loadCSV()
     if (filePath.isEmpty()) {
         return;
     }
+
+    currentCsvPath = filePath;   // ← сохраняем путь
 
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -144,7 +160,7 @@ void StockInsight::loadCSV()
         }
     }
 
-        file.close();
+    file.close();
     QMessageBox::information(this, "Готово", "Загружено " + QString::number(row) + " товаров!");
 }
 
@@ -208,6 +224,80 @@ void StockInsight::onSearchTextChanged(const QString& text)
     }
 }
 
+// ЗАПУСК PYTHON-СКРИПТА ДЛЯ ГЕНЕРАЦИИ ГРАФИКОВ
+void StockInsight::runPythonScript(const QString& csvPath)
+{
+    QString pythonExe = "python";
+    QString scriptPath = QCoreApplication::applicationDirPath() + "/generate_charts.py";
+
+    QProcess process;
+    process.start(pythonExe, QStringList() << scriptPath << csvPath);
+    process.waitForFinished();
+
+    if (process.exitCode() == 0) {
+        QMessageBox::information(this, "Готово", "Графики созданы!");
+        // Загружаем полученные картинки во вкладки
+        loadChartsToTabs();
+    }
+    else {
+        QString error = process.readAllStandardError();
+        QMessageBox::warning(this, "Ошибка", "Не удалось создать графики:\n" + error);
+    }
+}
+
+// ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ (после генерации Python-скриптом)
+void StockInsight::loadChartsToTabs()
+{
+    // Очищаем старые виджеты
+    for (int i = 0; i < chartLayouts.size(); ++i) {
+        QLayout* layout = chartLayouts[i];
+        QLayoutItem* item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+    }
+
+    QStringList imageFiles = {
+        "chart_stock_by_category.jpeg",
+        "chart_profit_by_category.jpeg",
+        "chart_monthly_sales.jpeg",
+        "chart_stale_products.jpeg"
+    };
+
+    for (int i = 0; i < imageFiles.size() && i < chartLayouts.size(); ++i) {
+        QPixmap pixmap(imageFiles[i]);
+        QLabel* label = new QLabel();
+        if (!pixmap.isNull()) {
+            // Получаем размеры вкладки
+            QWidget* parentWidget = chartLayouts[i]->parentWidget();
+            int w = parentWidget->width() - 20;
+            int h = parentWidget->height() - 20;
+            // Если размеры ещё не определены (например, при первом запуске)
+            if (w <= 0) w = 600;
+            if (h <= 0) h = 400;
+            // Масштабируем с плавным преобразованием
+            label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            label->setAlignment(Qt::AlignCenter);
+        }
+        else {
+            label->setText("График не найден: " + imageFiles[i]);
+        }
+        chartLayouts[i]->addWidget(label);
+    }
+}
+
+// ТЕСТОВАЯ ФУНКЦИЯ ДЛЯ ГРАФИКОВ (вызывается по кнопке)
+void StockInsight::showCharts()
+{
+    if (currentCsvPath.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Сначала загрузите CSV-файл!");
+        return;
+    }
+    runPythonScript(currentCsvPath);
+}
+
+// ВЫХОД ИЗ УЧЁТНОЙ ЗАПИСИ
 void StockInsight::logout()
 {
     this->close();  // Закрывает главное окно
