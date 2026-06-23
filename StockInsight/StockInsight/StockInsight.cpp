@@ -248,7 +248,7 @@ void StockInsight::runPythonScript(const QString& csvPath)
 // ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ (после генерации Python-скриптом)
 void StockInsight::loadChartsToTabs()
 {
-    // Очищаем старые виджеты
+    // Очищаем старые виджеты во вкладках
     for (int i = 0; i < chartLayouts.size(); ++i) {
         QLayout* layout = chartLayouts[i];
         QLayoutItem* item;
@@ -266,22 +266,21 @@ void StockInsight::loadChartsToTabs()
     };
 
     for (int i = 0; i < imageFiles.size() && i < chartLayouts.size(); ++i) {
-        QPixmap pixmap(imageFiles[i]);
+        // Путь к файлу в папке charts/
+        QString imagePath = "charts/" + imageFiles[i];
+        QPixmap pixmap(imagePath);
         QLabel* label = new QLabel();
         if (!pixmap.isNull()) {
-            // Получаем размеры вкладки
             QWidget* parentWidget = chartLayouts[i]->parentWidget();
             int w = parentWidget->width() - 20;
             int h = parentWidget->height() - 20;
-            // Если размеры ещё не определены (например, при первом запуске)
             if (w <= 0) w = 600;
             if (h <= 0) h = 400;
-            // Масштабируем с плавным преобразованием
             label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             label->setAlignment(Qt::AlignCenter);
         }
         else {
-            label->setText("График не найден: " + imageFiles[i]);
+            label->setText("График не найден: " + imagePath);
         }
         chartLayouts[i]->addWidget(label);
     }
