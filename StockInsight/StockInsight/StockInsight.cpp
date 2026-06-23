@@ -17,8 +17,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QSplitter>          // для разделителя таблицы и графиков
-#include <QComboBox>          // для фильтра по цвету
+#include <QSplitter>          
+#include <QComboBox>          
 
 
 // КОНСТРУКТОР
@@ -40,7 +40,7 @@ StockInsight::StockInsight(QWidget* parent)
     logoutBtn = new QPushButton("🚪 Выйти");
 
     QPushButton* testBtn = new QPushButton("📈 Показать графики");
-    QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");        // Новая кнопка сортировки
+    QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");       
 
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
@@ -55,8 +55,8 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addWidget(exportBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(testBtn);
-    buttonLayout->addWidget(sortBtn);              // Добавляем кнопку сортировки
-    buttonLayout->addWidget(colorFilter);          // Добавляем фильтр по цвету
+    buttonLayout->addWidget(sortBtn);              
+    buttonLayout->addWidget(colorFilter);         
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
     buttonLayout->addWidget(logoutBtn);
@@ -222,23 +222,26 @@ void StockInsight::setUserRole(const QString& role)
 {
     currentRole = role;
 
-    if (role == "guest") {
-        loadBtn->setEnabled(false);
-        saveBtn->setEnabled(false);
-        exportBtn->setEnabled(false);
-        clearBtn->setEnabled(false);
-    }
-    else if (role == "analyst") {
-        loadBtn->setEnabled(true);
-        saveBtn->setEnabled(true);
-        exportBtn->setEnabled(true);
-        clearBtn->setEnabled(false);
-    }
-    else { // admin
+    // --- АДМИН ---
+    if (role == "admin") {
         loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
         clearBtn->setEnabled(true);
+    }
+    // --- АНАЛИТИК ---
+    else if (role == "analyst") {
+        loadBtn->setEnabled(true);
+        saveBtn->setEnabled(true);
+        exportBtn->setEnabled(true);
+        clearBtn->setEnabled(false);   // Аналитик НЕ может очищать таблицу
+    }
+    // --- ГОСТЬ ---
+    else if (role == "guest") {
+        loadBtn->setEnabled(false);    // Гость НЕ может загружать
+        saveBtn->setEnabled(false);    // Гость НЕ может сохранять JSON
+        exportBtn->setEnabled(false);  // Гость НЕ может экспортировать JPEG
+        clearBtn->setEnabled(false);   // Гость НЕ может очищать таблицу
     }
 }
 
@@ -348,7 +351,7 @@ void StockInsight::showCharts()
     runPythonScript(currentCsvPath);
 }
 
-// СОРТИРОВКА ПО ДНЯМ (новая функция)
+// СОРТИРОВКА ПО ДНЯМ
 void StockInsight::sortByDays()
 {
     static bool ascending = true;
@@ -356,7 +359,7 @@ void StockInsight::sortByDays()
     ascending = !ascending;
 }
 
-// ФИЛЬТР ПО ЦВЕТУ (новая функция)
+// ФИЛЬТР ПО ЦВЕТУ
 void StockInsight::filterByColor(int index)
 {
     QString filterText = colorFilter->currentText();
