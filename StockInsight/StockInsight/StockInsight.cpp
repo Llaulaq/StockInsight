@@ -122,8 +122,8 @@ StockInsight::StockInsight(QWidget* parent)
     connect(testBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
-    connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);           // Сортировка
-    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor); // Фильтр по цвету
+    connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);           
+    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor); 
 }
 
 // ЗАГРУЗКА CSV

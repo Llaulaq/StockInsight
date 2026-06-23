@@ -7,6 +7,9 @@
 LoginDialog::LoginDialog(QWidget* parent)
     : QDialog(parent), role("guest")
 {
+    // Загружаем пользователей из файла
+    loadUsersFromFile();
+
     setWindowTitle("🔐 Авторизация");
     resize(300, 220);
 
@@ -46,21 +49,13 @@ LoginDialog::LoginDialog(QWidget* parent)
     connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
+// Обработчик нажатия кнопки "Войти"
 void LoginDialog::onLoginClicked()
 {
     QString user = usernameEdit->text().trimmed();
     QString pass = passwordEdit->text().trimmed();
 
-    // ВРЕМЕННАЯ БАЗА 
-    QMap<QString, QString> users;
-    QMap<QString, QString> passwords;
-    users["admin"] = "admin";
-    passwords["admin"] = "1234";
-    users["analyst"] = "analyst";
-    passwords["analyst"] = "5678";
-    users["guest"] = "guest";
-    passwords["guest"] = "0000";
-
+    // Проверяем по загруженным из файла данным
     if (users.contains(user) && passwords[user] == pass) {
         role = users[user];
         accept();
@@ -73,6 +68,7 @@ void LoginDialog::onLoginClicked()
     }
 }
 
+// Обработчик нажатия кнопки "Регистрация"
 void LoginDialog::onRegisterClicked()
 {
     RegisterDialog reg;
@@ -81,6 +77,11 @@ void LoginDialog::onRegisterClicked()
         QString password = reg.getPassword();
         QString role = reg.getRole();
 
+        // Добавляем нового пользователя
+        users[username] = role;
+        passwords[username] = password;
+        saveUsersToFile();
+
         QMessageBox::information(this, "Регистрация успешна",
             "Пользователь " + username + " зарегистрирован!\n"
             "Роль: " + role + "\n\n"
@@ -88,7 +89,73 @@ void LoginDialog::onRegisterClicked()
     }
 }
 
+// Возвращает роль текущего пользователя
 QString LoginDialog::getRole() const
 {
     return role;
+}
+
+// Загружает пользователей из JSON-файла
+void LoginDialog::loadUsersFromFile()
+{
+    QFile file("users.json");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        createDefaultUsersFile(); // Если файла нет — создаём
+        return;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    users.clear();
+    passwords.clear();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject root = doc.object();
+    QJsonArray usersArray = root["users"].toArray();
+
+    for (const QJsonValue& value : usersArray) {
+        QJsonObject obj = value.toObject();
+        QString username = obj["username"].toString();
+        QString password = obj["password"].toString();
+        QString role = obj["role"].toString();
+
+        users[username] = role;
+        passwords[username] = password;
+    }
+}
+
+// Сохраняет пользователей в JSON-файл
+void LoginDialog::saveUsersToFile()
+{
+    QJsonArray usersArray;
+
+    for (auto it = users.begin(); it != users.end(); ++it) {
+        QJsonObject obj;
+        obj["username"] = it.key();
+        obj["password"] = passwords[it.key()];
+        obj["role"] = it.value();
+        usersArray.append(obj);
+    }
+
+    QJsonObject root;
+    root["users"] = usersArray;
+
+    QFile file("users.json");
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.close();
+    }
+}
+
+// Создаёт файл с пользователями по умолчанию (admin, analyst, guest)
+void LoginDialog::createDefaultUsersFile()
+{
+    users["admin"] = "admin";
+    passwords["admin"] = "1234";
+    users["analyst"] = "analyst";
+    passwords["analyst"] = "5678";
+    users["guest"] = "guest";
+    passwords["guest"] = "0000";
+    saveUsersToFile();
 }
