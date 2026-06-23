@@ -15,6 +15,6 @@ Release/
 
 
 .venv/
-
+.vs/
 pyproject.toml
 uv.lock
