@@ -1,0 +1,15 @@
+{
+    "charts_data": {
+        "profit_by_category": {
+        },
+        "stock_by_category": {
+        }
+    },
+    "products": [
+    ],
+    "summary": {
+        "deficit_risk_count": 0,
+        "stale_count": 0,
+        "total_potential_profit": 0
+    }
+}
