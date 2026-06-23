@@ -17,6 +17,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QSplitter>          // для разделителя таблицы и графиков
 
 
 // КОНСТРУКТОР
@@ -60,7 +61,22 @@ StockInsight::StockInsight(QWidget* parent)
     table = new QTableWidget(0, 7);
     QStringList headers = { "Товар", "Категория", "Кол-во", "Цена зак.", "Цена прод.", "Дней", "Прибыль" };
     table->setHorizontalHeaderLabels(headers);
-    mainLayout->addWidget(table);
+
+    // --- Разделитель между таблицей и графиками ---
+    QSplitter* splitter = new QSplitter(Qt::Vertical, this);
+
+    // Обёртка для таблицы
+    QWidget* tableWrapper = new QWidget();
+    QVBoxLayout* tableWrapperLayout = new QVBoxLayout(tableWrapper);
+    tableWrapperLayout->setContentsMargins(0, 0, 0, 0);
+    tableWrapperLayout->addWidget(table);
+    tableWrapper->setMinimumHeight(150);       // чтобы таблица не схлопывалась
+
+    // Обёртка для вкладок с графиками
+    QWidget* chartsWrapper = new QWidget();
+    QVBoxLayout* chartsWrapperLayout = new QVBoxLayout(chartsWrapper);
+    chartsWrapperLayout->setContentsMargins(0, 0, 0, 0);
+    chartsWrapper->setMinimumHeight(150);      // чтобы графики не схлопывались
 
     // --- Вкладки для графиков (с layout'ами для картинок) ---
     tabs = new QTabWidget();
@@ -74,7 +90,17 @@ StockInsight::StockInsight(QWidget* parent)
         tabs->addTab(page, tabNames[i]);
         chartLayouts.append(layout);
     }
-    mainLayout->addWidget(tabs);
+    chartsWrapperLayout->addWidget(tabs);
+
+    // Добавляем оба виджета в разделитель
+    splitter->addWidget(tableWrapper);
+    splitter->addWidget(chartsWrapper);
+
+    // Начальные размеры (60% таблица, 40% графики)
+    splitter->setSizes({ 600, 400 });
+
+    // Добавляем разделитель в основной layout
+    mainLayout->addWidget(splitter);
 
     setWindowTitle("📊 StockInsight — Анализ склада");
     resize(1000, 700);
@@ -250,7 +276,7 @@ void StockInsight::runPythonScript(const QString& csvPath)
     }
 }
 
-// ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ (после генерации Python-скриптом)
+// ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ
 void StockInsight::loadChartsToTabs()
 {
     // Очищаем старые виджеты во вкладках
@@ -408,6 +434,7 @@ void StockInsight::saveJSON()
         QMessageBox::warning(this, "Ошибка", "Не удалось сохранить JSON!");
     }
 }
+
 // ЭКСПОРТ ТЕКУЩЕГО ГРАФИКА В JPEG
 void StockInsight::exportJPEG()
 {

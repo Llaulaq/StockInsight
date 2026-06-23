@@ -1,6 +1,7 @@
 #pragma once
 #include <QMainWindow>
 #include <QTableWidget>
+#include <QSplitter>
 #include <QPushButton>
 #include <QTabWidget>
 #include <QLineEdit>
