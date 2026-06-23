@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QVector>
 #include <QVBoxLayout>
+#include <QComboBox>          // для фильтра по цвету
 
 class StockInsight : public QMainWindow
 {
@@ -26,6 +27,8 @@ private slots:
     void showCharts();                      // Кнопка "Показать графики" — запускает Python-скрипт
     void saveJSON();                        // Сохранение данных в JSON
     void exportJPEG();                      // Экспорт текущего графика в JPEG
+    void sortByDays();                      // Сортировка таблицы по дням
+    void filterByColor(int index);          // Фильтр таблицы по цвету строк
 
 private:
     QTableWidget* table;
@@ -35,8 +38,10 @@ private:
     QPushButton* clearBtn;
     QPushButton* logoutBtn;
     QLineEdit* searchEdit;
+    QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
     QString currentRole;                    // Текущая роль пользователя
     QString currentCsvPath;                 // Путь к последнему загруженному CSV
+    QVector<QString> rowColors;             // Сохраняет цвета строк для фильтрации
 
     QTabWidget* tabs;                       // Вкладки для графиков
     QVector<QVBoxLayout*> chartLayouts;     // Layout'ы для вкладок, чтобы добавлять картинки

@@ -18,6 +18,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QSplitter>          // для разделителя таблицы и графиков
+#include <QComboBox>          // для фильтра по цвету
 
 
 // КОНСТРУКТОР
@@ -39,15 +40,23 @@ StockInsight::StockInsight(QWidget* parent)
     logoutBtn = new QPushButton("🚪 Выйти");
 
     QPushButton* testBtn = new QPushButton("📈 Показать графики");
+    QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");        // Новая кнопка сортировки
 
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
+
+    // --- Фильтр по цвету (выпадающий список) ---
+    colorFilter = new QComboBox();
+    colorFilter->addItems({ "Все", "🔴 Дефицит", "🟠 Залежалые", "🟢 Много товара" });
+    colorFilter->setMaximumWidth(150);
 
     buttonLayout->addWidget(loadBtn);
     buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(testBtn);
+    buttonLayout->addWidget(sortBtn);              // Добавляем кнопку сортировки
+    buttonLayout->addWidget(colorFilter);          // Добавляем фильтр по цвету
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
     buttonLayout->addWidget(logoutBtn);
@@ -113,6 +122,8 @@ StockInsight::StockInsight(QWidget* parent)
     connect(testBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
+    connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);           // Сортировка
+    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor); // Фильтр по цвету
 }
 
 // ЗАГРУЗКА CSV
@@ -133,6 +144,9 @@ void StockInsight::loadCSV()
     }
 
     table->setRowCount(0);
+    // Очищаем сохранённые цвета строк
+    rowColors.clear();
+
     QTextStream stream(&file);
     stream.setEncoding(QStringConverter::Utf8);
 
@@ -166,18 +180,25 @@ void StockInsight::loadCSV()
 
         // Определяем цвет текста
         QColor textColor;
+        QString colorKey = "normal";
         if (quantity < 5) {
             textColor = Qt::red;              // Дефицит
+            colorKey = "deficit";
         }
         else if (days > 90) {
             textColor = QColor(255, 165, 0);  // Залежалый (оранжевый)
+            colorKey = "stale";
         }
         else if (quantity > 20) {
             textColor = Qt::darkGreen;        // Много товара (тёмно-зелёный)
+            colorKey = "many";
         }
         else {
             textColor = Qt::white;            // Обычный текст (белый)
         }
+
+        // Сохраняем цвет строки
+        rowColors.append(colorKey);
 
         // Чередование фона
         QColor bgColor = (r % 2 == 0) ? QColor(50, 50, 50) : QColor(40, 40, 40);
@@ -225,6 +246,7 @@ void StockInsight::setUserRole(const QString& role)
 void StockInsight::clearTable()
 {
     table->setRowCount(0);
+    rowColors.clear();
     QMessageBox::information(this, "Готово", "Таблица очищена!");
 }
 
@@ -324,6 +346,40 @@ void StockInsight::showCharts()
         return;
     }
     runPythonScript(currentCsvPath);
+}
+
+// СОРТИРОВКА ПО ДНЯМ (новая функция)
+void StockInsight::sortByDays()
+{
+    static bool ascending = true;
+    table->sortItems(5, ascending ? Qt::AscendingOrder : Qt::DescendingOrder);
+    ascending = !ascending;
+}
+
+// ФИЛЬТР ПО ЦВЕТУ (новая функция)
+void StockInsight::filterByColor(int index)
+{
+    QString filterText = colorFilter->currentText();
+
+    for (int row = 0; row < table->rowCount(); ++row) {
+        // Определяем, соответствует ли строка фильтру
+        bool show = true;
+
+        if (filterText == "🔴 Дефицит") {
+            show = (rowColors[row] == "deficit");
+        }
+        else if (filterText == "🟠 Залежалые") {
+            show = (rowColors[row] == "stale");
+        }
+        else if (filterText == "🟢 Много товара") {
+            show = (rowColors[row] == "many");
+        }
+        else { // "Все"
+            show = true;
+        }
+
+        table->setRowHidden(row, !show);
+    }
 }
 
 // СОХРАНЕНИЕ ДАННЫХ В JSON
