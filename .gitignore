@@ -1,0 +1,15 @@
+.vscode/settings.json
+*.o
+Makefile
+moc_*
+ui_*
+qrc_*
+build-*/
+debug/
+release/
+*.pro.user*
+.vscode/settings.json
+*~
+*.log
+StockInsight
+.qmake.stash
