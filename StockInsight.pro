@@ -9,8 +9,10 @@ TEMPLATE = app
 SOURCES += \
     src/main.cpp \
     src/models/Product.cpp \
-    src/models/Analytics.cpp
+    src/models/Analytics.cpp \
+    src/services/CsvParser.cpp
 
 HEADERS += \
     src/models/Product.h \
-    src/models/Analytics.h
+    src/models/Analytics.h \
+    src/services/CsvParser.h
