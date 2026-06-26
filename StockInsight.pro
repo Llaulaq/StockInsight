@@ -23,3 +23,6 @@ HEADERS += \
 
 SOURCES += src/services/JsonStorage.cpp
 HEADERS += src/services/JsonStorage.h
+
+SOURCES += src/services/Logger.cpp
+HEADERS += src/services/Logger.h
