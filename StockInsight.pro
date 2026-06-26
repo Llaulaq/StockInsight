@@ -26,3 +26,20 @@ HEADERS += src/services/JsonStorage.h
 
 SOURCES += src/services/Logger.cpp
 HEADERS += src/services/Logger.h
+
+CONFIG += testlib
+QT += testlib
+
+testcase {
+    TARGET = StockInsightTests
+    SOURCES -= src/main.cpp
+    
+    SOURCES += \
+        tests/test_main.cpp \
+        tests/test_csv_parser.cpp \
+        tests/test_analytics_engine.cpp
+    
+    HEADERS += \
+        tests/test_csv_parser.h \
+        tests/test_analytics_engine.h
+}
