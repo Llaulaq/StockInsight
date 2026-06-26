@@ -17,4 +17,4 @@ struct Analytics {
     QVector<Product> staleProducts;
 };
 
-#endif // ANALYTICS_H
+#endif 

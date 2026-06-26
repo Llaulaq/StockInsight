@@ -13,7 +13,6 @@ struct Product {
     double salePrice = 0.0;
     QDate deliveryDate;
 
-    // Расчётные поля
     int daysInStock = 0;
     QVector<int> monthlySales;
     double avgSalesPerMonth = 0.0;
@@ -22,4 +21,4 @@ struct Product {
     bool isStale = false;
 };
 
-#endif // PRODUCT_H
+#endif

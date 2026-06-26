@@ -9,11 +9,11 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     
-    qDebug() << "=== Этап 2: Тест парсера CSV ===";
+    qDebug() << "Тест парсера CSV";
     
-    QString productPath = "/home/stone/programming/StockInsight/data/products.csv";
-    QString salesPath = "/home/stone/programming/StockInsight/data/sales.csv";
-    
+    QString productPath = "data/products.csv";
+    QString salesPath = "data/sales.csv";
+        
     QVector<Product> products = CsvParser::parseProducts(productPath);
     qDebug() << "Товаров:" << products.size();
     for (const auto &p : products) {

@@ -17,7 +17,7 @@ QVector<Product> CsvParser::parseProducts(const QString &filePath) {
     in.setEncoding(QStringConverter::Utf8);
     
     if (in.atEnd()) return products;
-    in.readLine(); // пропуск заголовка
+    in.readLine(); 
     
     int lineNum = 1;
     while (!in.atEnd()) {

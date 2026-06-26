@@ -11,4 +11,4 @@ public:
     static QMap<QString, QVector<int>> parseSales(const QString &filePath);
 };
 
-#endif // CSVPARSER_H
+#endif 
