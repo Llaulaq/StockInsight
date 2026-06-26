@@ -2,36 +2,39 @@
 #include <QDebug>
 #include "services/CsvParser.h"
 #include "services/DataMerger.h"
+#include "services/AnalyticsEngine.h"
 
+void printLine(const QString &title) {
+    qDebug() << "\n---" << title << "---";
+}
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     
-    qDebug() << "Тест парсера CSV";
+    printLine("Загрузка CSV");
+    QVector<Product> products = CsvParser::parseProducts("data/products.csv");
+    auto salesMap = CsvParser::parseSales("data/sales.csv");
+    qDebug() << "Товаров:" << products.size() << "| Продаж:" << salesMap.size();
     
-    QString productPath = "data/products.csv";
-    QString salesPath = "data/sales.csv";
-        
-    QVector<Product> products = CsvParser::parseProducts(productPath);
-    qDebug() << "Товаров:" << products.size();
-    for (const auto &p : products) {
-        qDebug() << " " << p.name << "|" << p.category << "|" << p.quantity << "шт.";
-    }
-    
-    auto salesMap = CsvParser::parseSales(salesPath);
-    qDebug() << "Продаж:" << salesMap.size();
-    for (auto it = salesMap.begin(); it != salesMap.end(); ++it) {
-        qDebug() << " " << it.key() << ":" << it.value();
-    }
-
-        // Объединяем
+    // Этап 3: Объединение
+    printLine("Объединение");
     DataMerger::merge(products, salesMap);
     
-    // Проверяем
-    for (const auto &p : products) {
-        qDebug() << p.name << "| продажи:" << p.monthlySales;
-    }
+    // Этап 4: Аналитика
+    printLine("Аналитика");
+    Analytics a = AnalyticsEngine::calculate(products);
+    
+    qDebug() << "Прибыль:" << a.totalPotentialProfit;
+    qDebug() << "Заморожено:" << a.frozenMoney;
+    qDebug() << "Дефицит:" << a.deficitRiskCount;
+    qDebug() << "Залежалых:" << a.staleCount;
+    
+    for (auto it = a.stockByCategory.begin(); it != a.stockByCategory.end(); ++it)
+        qDebug() << " " << it.key() << ":" << it.value() << "шт.";
+    
+    for (const auto &p : a.staleProducts)
+        qDebug() << " Залежалый:" << p.name << "| дней:" << p.daysInStock;
     
     return 0;
 }

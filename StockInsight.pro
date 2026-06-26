@@ -11,10 +11,12 @@ SOURCES += \
     src/models/Product.cpp \
     src/models/Analytics.cpp \
     src/services/CsvParser.cpp \
-    src/services/DataMerger.cpp
+    src/services/DataMerger.cpp \ 
+    src/services/AnalyticsEngine.cpp
 
 HEADERS += \
     src/models/Product.h \
     src/models/Analytics.h \
     src/services/CsvParser.h \
-    src/services/DataMerger.h
+    src/services/DataMerger.h \ 
+    src/services/AnalyticsEngine.h
