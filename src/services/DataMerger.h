@@ -11,4 +11,4 @@ public:
                       const QMap<QString, QVector<int>> &salesMap);
 };
 
-#endif x
+#endif 

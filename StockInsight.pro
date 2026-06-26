@@ -20,3 +20,6 @@ HEADERS += \
     src/services/CsvParser.h \
     src/services/DataMerger.h \ 
     src/services/AnalyticsEngine.h
+
+SOURCES += src/services/JsonStorage.cpp
+HEADERS += src/services/JsonStorage.h

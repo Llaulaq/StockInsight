@@ -3,26 +3,21 @@
 #include "services/CsvParser.h"
 #include "services/DataMerger.h"
 #include "services/AnalyticsEngine.h"
+#include "services/JsonStorage.h"
 
-void printLine(const QString &title) {
-    qDebug() << "\n---" << title << "---";
-}
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     
-    printLine("Загрузка CSV");
     QVector<Product> products = CsvParser::parseProducts("data/products.csv");
     auto salesMap = CsvParser::parseSales("data/sales.csv");
     qDebug() << "Товаров:" << products.size() << "| Продаж:" << salesMap.size();
     
-    // Этап 3: Объединение
-    printLine("Объединение");
+    // Объединение
     DataMerger::merge(products, salesMap);
     
-    // Этап 4: Аналитика
-    printLine("Аналитика");
+    // Аналитика
     Analytics a = AnalyticsEngine::calculate(products);
     
     qDebug() << "Прибыль:" << a.totalPotentialProfit;
@@ -35,6 +30,9 @@ int main(int argc, char *argv[])
     
     for (const auto &p : a.staleProducts)
         qDebug() << " Залежалый:" << p.name << "| дней:" << p.daysInStock;
+
+    // Сохранение JSON"
+    JsonStorage::save(a, products, "output.json");
     
     return 0;
 }
