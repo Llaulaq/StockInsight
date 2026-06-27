@@ -1,8 +1,17 @@
 #include "StockInsight.h"
 #include "LoginDialog.h"
-#include <QtCharts>
 #include <QApplication>
 #include <QMessageBox>
+#include <QDebug>          
+#include <QFile>
+#include <QDir>
+#include <QCoreApplication>
+
+#include "models/Product.h"
+#include "models/Analytics.h"
+#include "services/CsvParser.h"
+#include "services/DataMerger.h"
+#include "services/AnalyticsEngine.h"
 
 int main(int argc, char* argv[])
 {
@@ -13,22 +22,35 @@ int main(int argc, char* argv[])
         if (login.exec() == QDialog::Accepted) {
             QString role = login.getRole();
 
+            // Получаем путь к папке с .exe
+            QString exePath = QCoreApplication::applicationDirPath();
+            QString productsPath = exePath + "/products.csv";
+            QString salesPath = exePath + "/sales.csv";
+
+            qDebug() << "Путь к .exe:" << exePath;
+            qDebug() << "products.csv exists:" << QFile::exists(productsPath);
+            qDebug() << "sales.csv exists:" << QFile::exists(salesPath);
+
+            // ---- ЗАГРУЖАЕМ ДАННЫЕ ЧЕРЕЗ БЭКЕНД ДИМЫ ----
+            QVector<Product> products = CsvParser::parseProducts(productsPath);
+            auto salesMap = CsvParser::parseSales(salesPath);
+            DataMerger::merge(products, salesMap);
+            Analytics analytics = AnalyticsEngine::calculate(products);
+
+            // ---- ПОКАЗЫВАЕМ ГЛАВНОЕ ОКНО С ДАННЫМИ ----
             StockInsight w;
             w.setUserRole(role);
-            w.setWindowTitle("📊 StockInsight — Анализ склада [" + role + "]");
+            w.setAnalytics(analytics, products);
+
+            QMessageBox::information(nullptr, "Добро пожаловать",
+                "Вы вошли как: " + role + "\nДанные загружены: " + QString::number(products.size()) + " товаров.");
+
             w.show();
 
-            // Показываем приветствие с ролью
-            QMessageBox::information(nullptr, "Добро пожаловать",
-                "Вы вошли как: " + role + "\nДоступные функции зависят от вашей роли.");
-
-            // Ждём, пока главное окно закроется
             app.exec();
 
-            // Если окно закрыто — цикл повторяется (снова показываем вход)
         }
         else {
-            // Пользователь нажал "Отмена" — выходим из программы
             return 0;
         }
     }

@@ -20,6 +20,11 @@
 #include <QSplitter>          
 #include <QComboBox>          
 
+#include "models/Product.h"
+#include "models/Analytics.h"
+#include "services/CsvParser.h"
+#include "services/DataMerger.h"
+#include "services/AnalyticsEngine.h"
 
 // КОНСТРУКТОР
 StockInsight::StockInsight(QWidget* parent)
@@ -33,14 +38,15 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель ---
     QHBoxLayout* buttonLayout = new QHBoxLayout();
 
-    loadBtn = new QPushButton("📂 Загрузить CSV");
+    // loadBtn = new QPushButton("📂 Загрузить CSV");  // ← УДАЛЕНО (больше не нужно)
     saveBtn = new QPushButton("💾 Сохранить JSON");
     exportBtn = new QPushButton("🖼️ Экспорт JPEG");
     clearBtn = new QPushButton("🗑️ Очистить");
     logoutBtn = new QPushButton("🚪 Выйти");
 
     QPushButton* testBtn = new QPushButton("📈 Показать графики");
-    QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");       
+    QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");
+    QPushButton* refreshBtn = new QPushButton("🔄 Обновить данные");
 
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
@@ -50,13 +56,13 @@ StockInsight::StockInsight(QWidget* parent)
     colorFilter->addItems({ "Все", "🔴 Дефицит", "🟠 Залежалые", "🟢 Много товара" });
     colorFilter->setMaximumWidth(150);
 
-    buttonLayout->addWidget(loadBtn);
     buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(testBtn);
-    buttonLayout->addWidget(sortBtn);              
-    buttonLayout->addWidget(colorFilter);         
+    buttonLayout->addWidget(sortBtn);
+    buttonLayout->addWidget(colorFilter);
+    buttonLayout->addWidget(refreshBtn);
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
     buttonLayout->addWidget(logoutBtn);
@@ -79,13 +85,13 @@ StockInsight::StockInsight(QWidget* parent)
     QVBoxLayout* tableWrapperLayout = new QVBoxLayout(tableWrapper);
     tableWrapperLayout->setContentsMargins(0, 0, 0, 0);
     tableWrapperLayout->addWidget(table);
-    tableWrapper->setMinimumHeight(150);       // чтобы таблица не схлопывалась
+    tableWrapper->setMinimumHeight(150);
 
     // Обёртка для вкладок с графиками
     QWidget* chartsWrapper = new QWidget();
     QVBoxLayout* chartsWrapperLayout = new QVBoxLayout(chartsWrapper);
     chartsWrapperLayout->setContentsMargins(0, 0, 0, 0);
-    chartsWrapper->setMinimumHeight(150);      // чтобы графики не схлопывались
+    chartsWrapper->setMinimumHeight(150);
 
     // --- Вкладки для графиков (с layout'ами для картинок) ---
     tabs = new QTabWidget();
@@ -105,28 +111,28 @@ StockInsight::StockInsight(QWidget* parent)
     splitter->addWidget(tableWrapper);
     splitter->addWidget(chartsWrapper);
 
-    // Начальные размеры (60% таблица, 40% графики)
+    // Начальные размеры
     splitter->setSizes({ 600, 400 });
 
-    // Добавляем разделитель в основной layout
     mainLayout->addWidget(splitter);
 
     setWindowTitle("📊 StockInsight — Анализ склада");
     resize(1000, 700);
 
     // Подключение сигналов к слотам
-    connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);
+    // connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);  // ← УДАЛЕНО
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
     connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
     connect(logoutBtn, &QPushButton::clicked, this, &StockInsight::logout);
     connect(testBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
-    connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);           
-    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor); 
+    connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);
+    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
+    connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
 }
 
-// ЗАГРУЗКА CSV
+// ЗАГРУЗКА CSV (оставлена для совместимости, но не используется)
 void StockInsight::loadCSV()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Выберите CSV файл", "", "CSV файлы (*.csv);;Все файлы (*)");
@@ -144,7 +150,6 @@ void StockInsight::loadCSV()
     }
 
     table->setRowCount(0);
-    // Очищаем сохранённые цвета строк
     rowColors.clear();
 
     QTextStream stream(&file);
@@ -178,37 +183,33 @@ void StockInsight::loadCSV()
         int quantity = table->item(r, 2)->text().toInt();
         int days = table->item(r, 5)->text().toInt();
 
-        // Определяем цвет текста
         QColor textColor;
         QString colorKey = "normal";
         if (quantity < 5) {
-            textColor = Qt::red;              // Дефицит
+            textColor = Qt::red;
             colorKey = "deficit";
         }
         else if (days > 90) {
-            textColor = QColor(255, 165, 0);  // Залежалый (оранжевый)
+            textColor = QColor(255, 165, 0);
             colorKey = "stale";
         }
         else if (quantity > 20) {
-            textColor = Qt::darkGreen;        // Много товара (тёмно-зелёный)
+            textColor = Qt::darkGreen;
             colorKey = "many";
         }
         else {
-            textColor = Qt::white;            // Обычный текст (белый)
+            textColor = Qt::white;
         }
 
-        // Сохраняем цвет строки
         rowColors.append(colorKey);
 
-        // Чередование фона
         QColor bgColor = (r % 2 == 0) ? QColor(50, 50, 50) : QColor(40, 40, 40);
 
-        // Применяем ко всей строке
         for (int col = 0; col < table->columnCount(); ++col) {
             QTableWidgetItem* item = table->item(r, col);
             if (item) {
-                item->setForeground(textColor);   // Цвет текста
-                item->setBackground(bgColor);     // Чередование фона
+                item->setForeground(textColor);
+                item->setBackground(bgColor);
             }
         }
     }
@@ -222,26 +223,23 @@ void StockInsight::setUserRole(const QString& role)
 {
     currentRole = role;
 
-    // --- АДМИН ---
     if (role == "admin") {
-        loadBtn->setEnabled(true);
+        // loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
         clearBtn->setEnabled(true);
     }
-    // --- АНАЛИТИК ---
     else if (role == "analyst") {
-        loadBtn->setEnabled(true);
+        // loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
-        clearBtn->setEnabled(false);   // Аналитик НЕ может очищать таблицу
+        clearBtn->setEnabled(false);
     }
-    // --- ГОСТЬ ---
     else if (role == "guest") {
-        loadBtn->setEnabled(false);    // Гость НЕ может загружать
-        saveBtn->setEnabled(false);    // Гость НЕ может сохранять JSON
-        exportBtn->setEnabled(false);  // Гость НЕ может экспортировать JPEG
-        clearBtn->setEnabled(false);   // Гость НЕ может очищать таблицу
+        // loadBtn->setEnabled(false);
+        saveBtn->setEnabled(false);
+        exportBtn->setEnabled(false);
+        clearBtn->setEnabled(false);
     }
 }
 
@@ -256,7 +254,6 @@ void StockInsight::clearTable()
 // ПОИСК ПО ТАБЛИЦЕ
 void StockInsight::onSearchTextChanged(const QString& text)
 {
-    // Если поле пустое — показываем все строки
     if (text.isEmpty()) {
         for (int row = 0; row < table->rowCount(); ++row) {
             table->setRowHidden(row, false);
@@ -264,7 +261,6 @@ void StockInsight::onSearchTextChanged(const QString& text)
         return;
     }
 
-    // Ищем по всем строкам (по колонке "Товар" — индекс 0)
     for (int row = 0; row < table->rowCount(); ++row) {
         QTableWidgetItem* item = table->item(row, 0);
         bool isMatch = false;
@@ -276,12 +272,11 @@ void StockInsight::onSearchTextChanged(const QString& text)
             }
         }
 
-        // Скрываем или показываем строку
         table->setRowHidden(row, !isMatch);
     }
 }
 
-// ЗАПУСК PYTHON-СКРИПТА ДЛЯ ГЕНЕРАЦИИ ГРАФИКОВ
+// ЗАПУСК PYTHON-СКРИПТА
 void StockInsight::runPythonScript(const QString& csvPath)
 {
     QString pythonExe = "python";
@@ -304,7 +299,6 @@ void StockInsight::runPythonScript(const QString& csvPath)
 // ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ
 void StockInsight::loadChartsToTabs()
 {
-    // Очищаем старые виджеты во вкладках
     for (int i = 0; i < chartLayouts.size(); ++i) {
         QLayout* layout = chartLayouts[i];
         QLayoutItem* item;
@@ -344,6 +338,11 @@ void StockInsight::loadChartsToTabs()
 // КНОПКА "ПОКАЗАТЬ ГРАФИКИ"
 void StockInsight::showCharts()
 {
+    if (!currentProducts.isEmpty()) {
+        loadChartsFromAnalytics();
+        return;
+    }
+
     if (currentCsvPath.isEmpty()) {
         QMessageBox::warning(this, "Ошибка", "Сначала загрузите CSV-файл!");
         return;
@@ -365,7 +364,6 @@ void StockInsight::filterByColor(int index)
     QString filterText = colorFilter->currentText();
 
     for (int row = 0; row < table->rowCount(); ++row) {
-        // Определяем, соответствует ли строка фильтру
         bool show = true;
 
         if (filterText == "🔴 Дефицит") {
@@ -377,7 +375,7 @@ void StockInsight::filterByColor(int index)
         else if (filterText == "🟢 Много товара") {
             show = (rowColors[row] == "many");
         }
-        else { // "Все"
+        else {
             show = true;
         }
 
@@ -409,7 +407,6 @@ void StockInsight::saveJSON()
     for (int row = 0; row < table->rowCount(); ++row) {
         QJsonObject product;
 
-        // Проверяем наличие ячеек
         QTableWidgetItem* nameItem = table->item(row, 0);
         QTableWidgetItem* categoryItem = table->item(row, 1);
         QTableWidgetItem* quantityItem = table->item(row, 2);
@@ -417,12 +414,10 @@ void StockInsight::saveJSON()
         QTableWidgetItem* saleItem = table->item(row, 4);
         QTableWidgetItem* daysItem = table->item(row, 5);
 
-        // Пропускаем строку, если какая-то ячейка пуста
         if (!nameItem || !categoryItem || !quantityItem || !purchaseItem || !saleItem || !daysItem) {
             continue;
         }
 
-        // Безопасное преобразование с проверкой на пустоту
         QString nameText = nameItem->text().trimmed();
         QString categoryText = categoryItem->text().trimmed();
         QString quantityText = quantityItem->text().trimmed();
@@ -441,7 +436,6 @@ void StockInsight::saveJSON()
         double salePrice = saleText.toDouble(&okSale);
         int daysInStock = daysText.toInt(&okDays);
 
-        // Если преобразование не удалось — пропускаем строку
         if (!okQty || !okPur || !okSale || !okDays) {
             continue;
         }
@@ -516,7 +510,6 @@ void StockInsight::exportJPEG()
         return;
     }
 
-    // Получаем QPixmap по значению
     QPixmap pixmap = label->pixmap();
     if (pixmap.isNull()) {
         QMessageBox::warning(this, "Ошибка", "В этой вкладке нет графика для экспорта.");
@@ -533,6 +526,94 @@ void StockInsight::exportJPEG()
     else {
         QMessageBox::warning(this, "Ошибка", "Не удалось сохранить JPEG!");
     }
+}
+
+// ПЕРЕДАЧА ДАННЫХ ОТ БЭКЕНДА
+void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& products)
+{
+    currentAnalytics = data;
+    currentProducts = products;
+
+    table->setRowCount(0);
+    rowColors.clear();
+
+    for (const Product& p : products) {
+        int row = table->rowCount();
+        table->insertRow(row);
+
+        table->setItem(row, 0, new QTableWidgetItem(p.name));
+        table->setItem(row, 1, new QTableWidgetItem(p.category));
+        table->setItem(row, 2, new QTableWidgetItem(QString::number(p.quantity)));
+        table->setItem(row, 3, new QTableWidgetItem(QString::number(p.purchasePrice)));
+        table->setItem(row, 4, new QTableWidgetItem(QString::number(p.salePrice)));
+        table->setItem(row, 5, new QTableWidgetItem(QString::number(p.daysInStock)));
+        table->setItem(row, 6, new QTableWidgetItem(QString::number(p.totalProfit)));
+
+        if (p.isDeficit) rowColors.append("deficit");
+        else if (p.isStale) rowColors.append("stale");
+        else rowColors.append("normal");
+    }
+
+    for (int r = 0; r < table->rowCount(); ++r) {
+        QColor textColor;
+        if (rowColors[r] == "deficit") textColor = Qt::red;
+        else if (rowColors[r] == "stale") textColor = QColor(255, 165, 0);
+        else textColor = Qt::white;
+
+        for (int col = 0; col < table->columnCount(); ++col) {
+            QTableWidgetItem* item = table->item(r, col);
+            if (item) {
+                item->setForeground(textColor);
+            }
+        }
+    }
+}
+
+// ОБНОВЛЕНИЕ ДАННЫХ (НОВАЯ КНОПКА)
+void StockInsight::refreshData()
+{
+    // Перезагружаем данные через бэкенд Димы
+    QVector<Product> products = CsvParser::parseProducts("products.csv");
+    auto salesMap = CsvParser::parseSales("sales.csv");
+    DataMerger::merge(products, salesMap);
+    Analytics analytics = AnalyticsEngine::calculate(products);
+
+    // Обновляем таблицу и графики
+    setAnalytics(analytics, products);
+
+    QMessageBox::information(this, "Готово",
+        "Данные обновлены!\nЗагружено " + QString::number(products.size()) + " товаров.");
+}
+
+// СТРОИТ ГРАФИКИ ИЗ ДАННЫХ ANALYTICS (через Python)
+void StockInsight::loadChartsFromAnalytics()
+{
+    for (int i = 0; i < chartLayouts.size(); ++i) {
+        QLayout* layout = chartLayouts[i];
+        QLayoutItem* item;
+        while ((item = layout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+    }
+
+    if (currentProducts.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для построения графиков!");
+        return;
+    }
+
+    QFile file("temp_data.csv");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << "Товар;Категория;Количество;Цена_закупки;Цена_продажи;Дней\n";
+        for (const Product& p : currentProducts) {
+            out << p.name << ";" << p.category << ";" << p.quantity << ";"
+                << p.purchasePrice << ";" << p.salePrice << ";" << p.daysInStock << "\n";
+        }
+        file.close();
+    }
+
+    runPythonScript("temp_data.csv");
 }
 
 // ВЫХОД ИЗ УЧЁТНОЙ ЗАПИСИ

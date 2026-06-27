@@ -61,7 +61,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <LibraryPath>C:\Qt\6.8.0\msvc2022_64\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Qt\6.8.0\msvc2022_64\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\Dev\StockInsight\StockInsight\src;C:\Qt\6.8.0\msvc2022_64\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
@@ -102,6 +102,13 @@
     <QtRcc Include="StockInsight.qrc" />
     <QtUic Include="StockInsight.ui" />
     <QtMoc Include="StockInsight.h" />
+    <ClCompile Include="..\src\models\Analytics.cpp" />
+    <ClCompile Include="..\src\models\Product.cpp" />
+    <ClCompile Include="..\src\services\AnalyticsEngine.cpp" />
+    <ClCompile Include="..\src\services\CsvParser.cpp" />
+    <ClCompile Include="..\src\services\DataMerger.cpp" />
+    <ClCompile Include="..\src\services\JsonStorage.cpp" />
+    <ClCompile Include="..\src\services\Logger.cpp" />
     <ClCompile Include="LoginDialog.cpp" />
     <ClCompile Include="RegisterDialog.cpp" />
     <ClCompile Include="StockInsight.cpp" />
@@ -112,6 +119,15 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="RegisterDialog.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\models\Analytics.h" />
+    <ClInclude Include="..\src\models\Product.h" />
+    <ClInclude Include="..\src\services\AnalyticsEngine.h" />
+    <ClInclude Include="..\src\services\CsvParser.h" />
+    <ClInclude Include="..\src\services\DataMerger.h" />
+    <ClInclude Include="..\src\services\JsonStorage.h" />
+    <ClInclude Include="..\src\services\Logger.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

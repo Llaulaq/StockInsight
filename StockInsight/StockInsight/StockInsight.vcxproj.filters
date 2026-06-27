@@ -21,6 +21,18 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="Header Files\models">
+      <UniqueIdentifier>{f04d1d4e-764d-4e58-9541-c6cdff5572d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\services">
+      <UniqueIdentifier>{d9bd0659-94ba-4b12-b4c2-a9f004515b5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\services">
+      <UniqueIdentifier>{f9e7c856-6458-44db-b5cb-e8f89863b826}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\models">
+      <UniqueIdentifier>{3735d4a5-3eb4-49e6-a493-861ba4e0083d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="StockInsight.qrc">
@@ -46,6 +58,27 @@
     <ClCompile Include="RegisterDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\models\Product.cpp">
+      <Filter>Source Files\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\models\Analytics.cpp">
+      <Filter>Source Files\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\services\AnalyticsEngine.cpp">
+      <Filter>Source Files\services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\services\CsvParser.cpp">
+      <Filter>Source Files\services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\services\DataMerger.cpp">
+      <Filter>Source Files\services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\services\JsonStorage.cpp">
+      <Filter>Source Files\services</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\services\Logger.cpp">
+      <Filter>Source Files\services</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="LoginDialog.h">
@@ -54,5 +87,28 @@
     <QtMoc Include="RegisterDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\models\Product.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\models\Analytics.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\services\AnalyticsEngine.h">
+      <Filter>Header Files\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\services\CsvParser.h">
+      <Filter>Header Files\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\services\DataMerger.h">
+      <Filter>Header Files\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\services\JsonStorage.h">
+      <Filter>Header Files\services</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\services\Logger.h">
+      <Filter>Header Files\services</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
