@@ -323,10 +323,9 @@ void StockInsight::loadChartsToTabs()
             QWidget* parentWidget = chartLayouts[i]->parentWidget();
             int w = parentWidget->width() - 20;
             int h = parentWidget->height() - 20;
-            if (w <= 0) w = 600;
-            if (h <= 0) h = 400;
+            if (w <= 0) w = 800;
+            if (h <= 0) h = 500;
             label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-            label->setAlignment(Qt::AlignCenter);
         }
         else {
             label->setText("График не найден: " + imagePath);
@@ -373,7 +372,7 @@ void StockInsight::filterByColor(int index)
             show = (rowColors[row] == "stale");
         }
         else if (filterText == "🟢 Много товара") {
-            show = (rowColors[row] == "many");
+            show = (rowColors[row] == "green");
         }
         else {
             show = true;
@@ -521,24 +520,61 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
         int row = table->rowCount();
         table->insertRow(row);
 
+        // -- Текстовые поля --
         table->setItem(row, 0, new QTableWidgetItem(p.name));
         table->setItem(row, 1, new QTableWidgetItem(p.category));
-        table->setItem(row, 2, new QTableWidgetItem(QString::number(p.quantity)));
-        table->setItem(row, 3, new QTableWidgetItem(QString::number(p.purchasePrice)));
-        table->setItem(row, 4, new QTableWidgetItem(QString::number(p.salePrice)));
-        table->setItem(row, 5, new QTableWidgetItem(QString::number(p.daysInStock)));
-        table->setItem(row, 6, new QTableWidgetItem(QString::number(p.totalProfit)));
 
-        if (p.isDeficit) rowColors.append("deficit");
-        else if (p.isStale) rowColors.append("stale");
-        else rowColors.append("normal");
+        // -- Числовые поля (для корректной сортировки) --
+        QTableWidgetItem* qtyItem = new QTableWidgetItem();
+        qtyItem->setData(Qt::DisplayRole, p.quantity);
+        table->setItem(row, 2, qtyItem);
+
+        QTableWidgetItem* purchaseItem = new QTableWidgetItem();
+        purchaseItem->setData(Qt::DisplayRole, p.purchasePrice);
+        table->setItem(row, 3, purchaseItem);
+
+        QTableWidgetItem* saleItem = new QTableWidgetItem();
+        saleItem->setData(Qt::DisplayRole, p.salePrice);
+        table->setItem(row, 4, saleItem);
+
+        QTableWidgetItem* daysItem = new QTableWidgetItem();
+        daysItem->setData(Qt::DisplayRole, p.daysInStock);
+        table->setItem(row, 5, daysItem);
+
+        QTableWidgetItem* profitItem = new QTableWidgetItem();
+        profitItem->setData(Qt::DisplayRole, p.totalProfit);
+        table->setItem(row, 6, profitItem);
+
+        // -- Цветовая метка --
+        if (p.isDeficit) {
+            rowColors.append("deficit");
+        }
+        else if (p.isStale) {
+            rowColors.append("stale");
+        }
+        else if (p.quantity > 20) {
+            rowColors.append("green");
+        }
+        else {
+            rowColors.append("normal");
+        }
     }
 
+    // -- Применяем цвета --
     for (int r = 0; r < table->rowCount(); ++r) {
         QColor textColor;
-        if (rowColors[r] == "deficit") textColor = Qt::red;
-        else if (rowColors[r] == "stale") textColor = QColor(255, 165, 0);
-        else textColor = Qt::white;
+        if (rowColors[r] == "deficit") {
+            textColor = Qt::red;
+        }
+        else if (rowColors[r] == "stale") {
+            textColor = QColor(255, 165, 0);
+        }
+        else if (rowColors[r] == "green") {
+            textColor = Qt::darkGreen;
+        }
+        else {
+            textColor = Qt::white;
+        }
 
         for (int col = 0; col < table->columnCount(); ++col) {
             QTableWidgetItem* item = table->item(r, col);
