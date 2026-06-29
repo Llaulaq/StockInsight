@@ -1,0 +1,264 @@
+/* ОКНО */
+QMainWindow {
+    background-color: #1e1e2f;
+}
+
+/* ТЕКСТОВЫЕ МЕТКИ */
+QLabel {
+    color: #cdd6f4;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+QLabel#titleLabel {
+    font-size: 20px;
+    font-weight: bold;
+    color: #a6e3a1;
+    padding: 10px 0;
+}
+
+/* КНОПКИ */
+QPushButton {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+QPushButton:hover {
+    background-color: #45475a;
+}
+
+QPushButton:pressed {
+    background-color: #585b70;
+}
+
+QPushButton:disabled {
+    background-color: #2a2a3a;
+    color: #6c7086;
+}
+
+/* КНОПКА "ВЫЙТИ" (КРАСНАЯ) */
+QPushButton#logoutBtn {
+    background-color: #f38ba8;
+    color: #1e1e2f;
+    font-weight: bold;
+}
+
+QPushButton#logoutBtn:hover {
+    background-color: #f28b9c;
+}
+
+/* КНОПКА "ОБНОВИТЬ ДАННЫЕ" (СИНЯЯ) */
+QPushButton#refreshBtn {
+    background-color: #89b4fa;
+    color: #1e1e2f;
+    font-weight: bold;
+}
+
+QPushButton#refreshBtn:hover {
+    background-color: #7aafff;
+}
+
+/* КНОПКА "ОЧИСТИТЬ" (ЖЁЛТАЯ) */
+QPushButton#clearBtn {
+    background-color: #f9e2af;
+    color: #1e1e2f;
+    font-weight: bold;
+}
+
+QPushButton#clearBtn:hover {
+    background-color: #f5d98a;
+}
+
+/* КНОПКА "СОХРАНИТЬ JSON" (ЗЕЛЁНАЯ) */
+QPushButton#saveBtn {
+    background-color: #a6e3a1;
+    color: #1e1e2f;
+    font-weight: bold;
+}
+
+QPushButton#saveBtn:hover {
+    background-color: #94d98e;
+}
+
+/* КНОПКА "ЭКСПОРТ JPEG" (ФИОЛЕТОВАЯ) */
+QPushButton#exportBtn {
+    background-color: #cba6f7;
+    color: #1e1e2f;
+    font-weight: bold;
+}
+
+QPushButton#exportBtn:hover {
+    background-color: #b894e5;
+}
+
+/* ПОЛЯ ВВОДА (ПОИСК) */
+QLineEdit {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+QLineEdit:focus {
+    border: 1px solid #89b4fa;
+}
+
+QLineEdit::placeholder {
+    color: #6c7086;
+}
+
+/* ВЫПАДАЮЩИЙ СПИСОК (ФИЛЬТР ПО ЦВЕТУ) */
+QComboBox {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+QComboBox:hover {
+    border: 1px solid #89b4fa;
+}
+
+QComboBox::drop-down {
+    border: none;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #313244;
+    color: #cdd6f4;
+    selection-background-color: #45475a;
+    border-radius: 8px;
+}
+
+/* ТАБЛИЦА */
+QTableWidget {
+    background-color: #1e1e2f;
+    color: #cdd6f4;
+    gridline-color: #313244;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    font-size: 13px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+}
+
+QTableWidget::item {
+    padding: 6px 12px;
+    background-color: transparent;
+}
+
+QTableWidget::item:selected {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+/* ЗАГОЛОВКИ ТАБЛИЦЫ */
+QHeaderView::section {
+    background-color: #313244;
+    color: #a6e3a1;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: none;
+    font-size: 13px;
+}
+
+QHeaderView::section:checked {
+    background-color: #45475a;
+}
+
+QTableCornerButton::section {
+    background-color: #313244;
+}
+
+/* ВКЛАДКИ ДЛЯ ГРАФИКОВ */
+QTabWidget::pane {
+    background-color: #1e1e2f;
+    border: none;
+    border-radius: 8px;
+}
+
+QTabBar::tab {
+    background-color: #313244;
+    color: #6c7086;
+    padding: 8px 20px;
+    margin-right: 4px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+QTabBar::tab:selected {
+    background-color: #45475a;
+    color: #cdd6f4;
+}
+
+QTabBar::tab:hover {
+    background-color: #45475a;
+    color: #cdd6f4;
+}
+
+/* РАЗДЕЛИТЕЛЬ (ДВИЖОК МЕЖДУ ТАБЛИЦЕЙ И ГРАФИКАМИ) */
+QSplitter::handle {
+    background-color: #313244;
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* ВЕРТИКАЛЬНАЯ ПОЛОСА ПРОКРУТКИ */
+QScrollBar:vertical {
+    background-color: #1e1e2f;
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #45475a;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #585b70;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* ГОРИЗОНТАЛЬНАЯ ПОЛОСА ПРОКРУТКИ */
+QScrollBar:horizontal {
+    background-color: #1e1e2f;
+    height: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #45475a;
+    border-radius: 4px;
+    min-width: 20px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #585b70;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}

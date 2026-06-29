@@ -19,6 +19,7 @@
 #include <QJsonArray>
 #include <QSplitter>          
 #include <QComboBox>          
+#include <QFile>              
 
 #include "models/Product.h"
 #include "models/Analytics.h"
@@ -119,7 +120,15 @@ StockInsight::StockInsight(QWidget* parent)
     setWindowTitle("📊 StockInsight — Анализ склада");
     resize(1000, 700);
 
-    // Подключение сигналов к слотам
+    // --- Загрузка стилей ---
+    QFile styleFile("style.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        QString style = styleFile.readAll();
+        this->setStyleSheet(style);
+        styleFile.close();
+    }
+
+    // --- Подключение сигналов к слотам ---
     // connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);  // ← УДАЛЕНО
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
     connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
@@ -299,6 +308,7 @@ void StockInsight::runPythonScript(const QString& csvPath)
 // ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ
 void StockInsight::loadChartsToTabs()
 {
+    // Очищаем старые виджеты во вкладках
     for (int i = 0; i < chartLayouts.size(); ++i) {
         QLayout* layout = chartLayouts[i];
         QLayoutItem* item;
@@ -323,9 +333,13 @@ void StockInsight::loadChartsToTabs()
             QWidget* parentWidget = chartLayouts[i]->parentWidget();
             int w = parentWidget->width() - 20;
             int h = parentWidget->height() - 20;
-            if (w <= 0) w = 800;
-            if (h <= 0) h = 500;
+
+            // --- Минимальный размер, чтобы график не был слишком маленьким ---
+            if (w < 700) w = 700;
+            if (h < 500) h = 500;
+
             label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            label->setAlignment(Qt::AlignCenter);
         }
         else {
             label->setText("График не найден: " + imagePath);
@@ -585,7 +599,7 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
     }
 }
 
-// ОБНОВЛЕНИЕ ДАННЫХ (НОВАЯ КНОПКА)
+// ОБНОВЛЕНИЕ ДАННЫХ 
 void StockInsight::refreshData()
 {
     // Получаем путь к папке с .exe
