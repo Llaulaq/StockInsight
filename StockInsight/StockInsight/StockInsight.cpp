@@ -386,8 +386,8 @@ void StockInsight::filterByColor(int index)
 // СОХРАНЕНИЕ ДАННЫХ В JSON
 void StockInsight::saveJSON()
 {
-    if (table->rowCount() == 0) {
-        QMessageBox::warning(this, "Ошибка", "Таблица пуста! Сначала загрузите CSV.");
+    if (currentProducts.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для сохранения! Сначала загрузите CSV.");
         return;
     }
 
@@ -395,83 +395,63 @@ void StockInsight::saveJSON()
     if (filePath.isEmpty()) return;
 
     QJsonArray productsArray;
-    QJsonObject summary;
-    QJsonObject chartsData;
-    QJsonObject stockByCategory;
-    QJsonObject profitByCategory;
 
-    double totalProfit = 0;
-    int deficitCount = 0;
-    int staleCount = 0;
-
-    for (int row = 0; row < table->rowCount(); ++row) {
+    // --- Товары из currentProducts ---
+    for (const Product& p : currentProducts) {
         QJsonObject product;
+        product["name"] = p.name;
+        product["category"] = p.category;
+        product["quantity"] = p.quantity;
+        product["purchase_price"] = p.purchasePrice;
+        product["sale_price"] = p.salePrice;
+        product["days_in_stock"] = p.daysInStock;
+        product["total_profit"] = p.totalProfit;
+        product["is_defisit"] = p.isDeficit;
+        product["is_stale"] = p.isStale;
 
-        QTableWidgetItem* nameItem = table->item(row, 0);
-        QTableWidgetItem* categoryItem = table->item(row, 1);
-        QTableWidgetItem* quantityItem = table->item(row, 2);
-        QTableWidgetItem* purchaseItem = table->item(row, 3);
-        QTableWidgetItem* saleItem = table->item(row, 4);
-        QTableWidgetItem* daysItem = table->item(row, 5);
-
-        if (!nameItem || !categoryItem || !quantityItem || !purchaseItem || !saleItem || !daysItem) {
-            continue;
+        // monthlySales (если есть)
+        QJsonArray salesArr;
+        for (int s : p.monthlySales) {
+            salesArr.append(s);
         }
-
-        QString nameText = nameItem->text().trimmed();
-        QString categoryText = categoryItem->text().trimmed();
-        QString quantityText = quantityItem->text().trimmed();
-        QString purchaseText = purchaseItem->text().trimmed();
-        QString saleText = saleItem->text().trimmed();
-        QString daysText = daysItem->text().trimmed();
-
-        if (nameText.isEmpty() || categoryText.isEmpty() || quantityText.isEmpty() ||
-            purchaseText.isEmpty() || saleText.isEmpty() || daysText.isEmpty()) {
-            continue;
-        }
-
-        bool okQty, okPur, okSale, okDays;
-        int quantity = quantityText.toInt(&okQty);
-        double purchasePrice = purchaseText.toDouble(&okPur);
-        double salePrice = saleText.toDouble(&okSale);
-        int daysInStock = daysText.toInt(&okDays);
-
-        if (!okQty || !okPur || !okSale || !okDays) {
-            continue;
-        }
-
-        product["name"] = nameText;
-        product["category"] = categoryText;
-        product["quantity"] = quantity;
-        product["purchase_price"] = purchasePrice;
-        product["sale_price"] = salePrice;
-        product["days_in_stock"] = daysInStock;
-
-        double profit = (salePrice - purchasePrice) * quantity;
-        product["profit_per_unit"] = profit / quantity;
-        product["total_profit"] = profit;
-        totalProfit += profit;
-
-        product["is_stale"] = daysInStock > 90;
-        product["is_deficit"] = quantity < 5;
-
-        if (product["is_deficit"].toBool()) deficitCount++;
-        if (product["is_stale"].toBool()) staleCount++;
-
-        QString category = categoryText;
-        stockByCategory[category] = stockByCategory[category].toInt() + quantity;
-        profitByCategory[category] = profitByCategory[category].toDouble() + profit;
+        product["monthly_sales"] = salesArr;
 
         productsArray.append(product);
     }
 
-    summary["total_potential_profit"] = totalProfit;
-    summary["deficit_risk_count"] = deficitCount;
-    summary["stale_count"] = staleCount;
+    // --- Сводка из currentAnalytics ---
+    QJsonObject summary;
+    summary["total_potential_profit"] = currentAnalytics.totalPotentialProfit;
+    summary["frozen_money"] = currentAnalytics.frozenMoney;
+    summary["defisit_risk_count"] = currentAnalytics.deficitRiskCount;
+    summary["stale_count"] = currentAnalytics.staleCount;
 
-    chartsData["stock_by_category"] = stockByCategory;
-    chartsData["profit_by_category"] = profitByCategory;
+    // --- Данные для графиков ---
+    QJsonObject chartsData;
 
+    QJsonObject stockCat;
+    for (auto it = currentAnalytics.stockByCategory.begin(); it != currentAnalytics.stockByCategory.end(); ++it) {
+        stockCat[it.key()] = it.value();
+    }
+    chartsData["stock_by_category"] = stockCat;
+
+    QJsonObject profitCat;
+    for (auto it = currentAnalytics.profitByCategory.begin(); it != currentAnalytics.profitByCategory.end(); ++it) {
+        profitCat[it.key()] = it.value();
+    }
+    chartsData["profit_by_category"] = profitCat;
+
+    QJsonObject salesMonth;
+    for (auto it = currentAnalytics.salesByMonth.begin(); it != currentAnalytics.salesByMonth.end(); ++it) {
+        QJsonArray arr;
+        for (int s : it.value()) {
+            arr.append(s);
+        }
+        salesMonth[it.key()] = arr;
+    }
+    chartsData["sales_by_month"] = salesMonth;
+
+    // --- Корень JSON ---
     QJsonObject root;
     root["summary"] = summary;
     root["products"] = productsArray;
