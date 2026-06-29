@@ -552,14 +552,34 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
 // ОБНОВЛЕНИЕ ДАННЫХ (НОВАЯ КНОПКА)
 void StockInsight::refreshData()
 {
-    // Перезагружаем данные через бэкенд Димы
-    QVector<Product> products = CsvParser::parseProducts("products.csv");
-    auto salesMap = CsvParser::parseSales("sales.csv");
+    // Получаем путь к папке с .exe
+    QString exePath = QCoreApplication::applicationDirPath();
+    QString productsPath = exePath + "/products.csv";
+    QString salesPath = exePath + "/sales.csv";
+
+    qDebug() << "Обновление данных...";
+    qDebug() << "products.csv exists:" << QFile::exists(productsPath);
+    qDebug() << "sales.csv exists:" << QFile::exists(salesPath);
+
+    // Проверяем, есть ли файлы
+    if (!QFile::exists(productsPath)) {
+        QMessageBox::warning(this, "Ошибка", "Файл products.csv не найден!\n" + productsPath);
+        return;
+    }
+
+    // Загружаем данные через бэкенд Димы
+    QVector<Product> products = CsvParser::parseProducts(productsPath);
+    auto salesMap = CsvParser::parseSales(salesPath);
     DataMerger::merge(products, salesMap);
     Analytics analytics = AnalyticsEngine::calculate(products);
 
     // Обновляем таблицу и графики
     setAnalytics(analytics, products);
+
+    // Если есть данные — обновляем графики
+    if (!products.isEmpty()) {
+        loadChartsFromAnalytics();
+    }
 
     QMessageBox::information(this, "Готово",
         "Данные обновлены!\nЗагружено " + QString::number(products.size()) + " товаров.");
