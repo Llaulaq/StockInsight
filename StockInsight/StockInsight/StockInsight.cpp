@@ -136,7 +136,7 @@ StockInsight::StockInsight(QWidget* parent)
     resize(1000, 700);
 
     // --- Загрузка стилей (тёмная тема по умолчанию) ---
-    QFile styleFile("style_dark.qss");
+    QFile styleFile("styles/dark.qss");
     if (styleFile.open(QFile::ReadOnly)) {
         QString style = styleFile.readAll();
         this->setStyleSheet(style);
@@ -733,7 +733,7 @@ void StockInsight::setTheme(const QString& theme)
 {
     if (theme == "light") {
         isDarkTheme = false;
-        QFile styleFile("style_light.qss");
+        QFile styleFile("styles/light.qss");
         if (styleFile.open(QFile::ReadOnly)) {
             QString style = styleFile.readAll();
             this->setStyleSheet(style);
@@ -745,7 +745,7 @@ void StockInsight::setTheme(const QString& theme)
     }
     else {
         isDarkTheme = true;
-        QFile styleFile("style_dark.qss");
+        QFile styleFile("styles/dark.qss");
         if (styleFile.open(QFile::ReadOnly)) {
             QString style = styleFile.readAll();
             this->setStyleSheet(style);
@@ -804,7 +804,7 @@ void StockInsight::toggleTheme()
 {
     isDarkTheme = !isDarkTheme;
 
-    QString themeFile = isDarkTheme ? "style_dark.qss" : "style_light.qss";
+    QString themeFile = isDarkTheme ? "styles/dark.qss" : "styles/light.qss";
     QFile styleFile(themeFile);
     if (styleFile.open(QFile::ReadOnly)) {
         QString style = styleFile.readAll();
