@@ -9,16 +9,25 @@
         {
             "password": "5678",
             "role": "analyst",
+            "theme": "dark",
             "username": "analyst"
         },
         {
             "password": "1234",
             "role": "Аналитик",
+            "theme": "dark",
             "username": "dasha"
+        },
+        {
+            "password": "1234",
+            "role": "Гость",
+            "theme": "dark",
+            "username": "dima"
         },
         {
             "password": "0000",
             "role": "guest",
+            "theme": "dark",
             "username": "guest"
         }
     ]

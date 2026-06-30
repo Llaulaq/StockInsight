@@ -45,61 +45,6 @@ QPushButton:disabled {
     color: #6c7086;
 }
 
-/* КНОПКА "ВЫЙТИ" (КРАСНАЯ) */
-QPushButton#logoutBtn {
-    background-color: #f38ba8;
-    color: #1e1e2f;
-    font-weight: bold;
-}
-
-QPushButton#logoutBtn:hover {
-    background-color: #f28b9c;
-}
-
-/* КНОПКА "ОБНОВИТЬ ДАННЫЕ" (СИНЯЯ) */
-QPushButton#refreshBtn {
-    background-color: #89b4fa;
-    color: #1e1e2f;
-    font-weight: bold;
-}
-
-QPushButton#refreshBtn:hover {
-    background-color: #7aafff;
-}
-
-/* КНОПКА "ОЧИСТИТЬ" (ЖЁЛТАЯ) */
-QPushButton#clearBtn {
-    background-color: #f9e2af;
-    color: #1e1e2f;
-    font-weight: bold;
-}
-
-QPushButton#clearBtn:hover {
-    background-color: #f5d98a;
-}
-
-/* КНОПКА "СОХРАНИТЬ JSON" (ЗЕЛЁНАЯ) */
-QPushButton#saveBtn {
-    background-color: #a6e3a1;
-    color: #1e1e2f;
-    font-weight: bold;
-}
-
-QPushButton#saveBtn:hover {
-    background-color: #94d98e;
-}
-
-/* КНОПКА "ЭКСПОРТ JPEG" (ФИОЛЕТОВАЯ) */
-QPushButton#exportBtn {
-    background-color: #cba6f7;
-    color: #1e1e2f;
-    font-weight: bold;
-}
-
-QPushButton#exportBtn:hover {
-    background-color: #b894e5;
-}
-
 /* ПОЛЯ ВВОДА (ПОИСК) */
 QLineEdit {
     background-color: #313244;

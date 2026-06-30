@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QShowEvent>
 
 class LoginDialog : public QDialog
 {
@@ -18,6 +19,9 @@ public:
     QString getRole() const;        // Возвращает роль пользователя
     QString getTheme() const;       // Возвращает тему пользователя (dark/light)
     QString getUsername() const;    // Возвращает имя текущего пользователя
+
+protected:
+    void showEvent(QShowEvent* event) override;  // Очищает поля при показе окна
 
 private slots:
     void onLoginClicked();          // Обработчик нажатия кнопки "Войти"

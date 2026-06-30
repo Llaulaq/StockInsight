@@ -35,6 +35,7 @@ LoginDialog::LoginDialog(QWidget* parent)
 
     statusLabel = new QLabel();
     statusLabel->setStyleSheet("color: red;");
+    statusLabel->clear();  // Очищаем статус при создании
 
     // --- Кнопки ---
     loginButton = new QPushButton("✅ Войти");
@@ -207,4 +208,14 @@ void LoginDialog::createDefaultUsersFile()
     userThemes["guest"] = "dark";
 
     saveUsersToFile();
+}
+
+// Очищаем статус и поля при показе окна
+void LoginDialog::showEvent(QShowEvent* event)
+{
+    QDialog::showEvent(event);
+    statusLabel->clear();
+    usernameEdit->clear();
+    passwordEdit->clear();
+    usernameEdit->setFocus();
 }

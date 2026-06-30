@@ -853,7 +853,7 @@ bool StockInsight::eventFilter(QObject* obj, QEvent* event)
         if (mouseEvent->button() == Qt::LeftButton) {
             QLabel* label = qobject_cast<QLabel*>(obj);
             if (label) {
-                QPixmap pixmap = label->pixmap();  
+                QPixmap pixmap = label->pixmap();
                 if (!pixmap.isNull()) {
                     onChartClicked();
                     return true;
