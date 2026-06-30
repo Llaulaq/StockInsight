@@ -49,11 +49,6 @@ int main(int argc, char* argv[])
         QString theme = login.getTheme();   // Получаем тему пользователя
         QString username = login.getUsername(); // Получаем имя пользователя
 
-        qDebug() << "===== ИНФОРМАЦИЯ О ВХОДЕ =====";
-        qDebug() << "Роль:" << role;
-        qDebug() << "Тема из login:" << theme;
-        qDebug() << "Имя пользователя:" << username;
-
         QString exePath = QCoreApplication::applicationDirPath();
         QString productsPath = exePath + "/products.csv";
         QString salesPath = exePath + "/sales.csv";
@@ -71,8 +66,6 @@ int main(int argc, char* argv[])
         mainWindow.setUsername(username);        // Передаём имя пользователя для сохранения темы
         mainWindow.setAnalytics(analytics, products);
         mainWindow.setTheme(theme);              // Устанавливаем тему пользователя
-
-        qDebug() << "Тема установлена в главное окно:" << theme;
 
         // --- ПОКАЗЫВАЕМ ОКНО ---
         mainWindow.show();

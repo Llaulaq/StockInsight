@@ -442,9 +442,9 @@ void StockInsight::loadChartsToTabs()
 // КНОПКА "ПОКАЗАТЬ ГРАФИКИ"
 void StockInsight::showCharts()
 {
-    // Проверяем, есть ли данные
-    if (currentProducts.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Нет данных для построения графиков! Сначала загрузите CSV.");
+    // Проверяем, есть ли данные и не очищена ли таблица
+    if (currentProducts.isEmpty() || isTableCleared) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для построения графиков! Сначала загрузите данные.");
         return;
     }
 
