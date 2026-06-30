@@ -85,10 +85,10 @@ void LoginDialog::onLoginClicked()
 // Обработчик нажатия кнопки "Регистрация"
 void LoginDialog::onRegisterClicked()
 {
-    this->hide();  // ← скрываем окно входа
+    RegisterDialog reg(this);
+    int result = reg.exec();
 
-    RegisterDialog reg;
-    if (reg.exec() == QDialog::Accepted) {
+    if (result == QDialog::Accepted) {
         QString username = reg.getUsername();
         QString password = reg.getPassword();
         QString role = reg.getRole();
@@ -104,8 +104,8 @@ void LoginDialog::onRegisterClicked()
             "Роль: " + role + "\n\n"
             "Теперь вы можете войти.");
     }
-
-    this->show();  // ← показываем окно входа обратно
+    // При нажатии "Отмена" или закрытии окна регистрации - ничего не делаем,
+    // просто остаёмся на окне входа
 }
 
 // Возвращает роль текущего пользователя
@@ -120,7 +120,7 @@ QString LoginDialog::getTheme() const
     if (userThemes.contains(currentUser)) {
         return userThemes[currentUser];
     }
-    return "dark";   // тема по умолчанию
+    return "dark";
 }
 
 // Возвращает имя текущего пользователя
@@ -128,7 +128,6 @@ QString LoginDialog::getUsername() const
 {
     return currentUser;
 }
-
 
 // РАБОТА С ФАЙЛОМ users.json
 

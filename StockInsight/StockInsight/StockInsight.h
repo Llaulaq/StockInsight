@@ -25,6 +25,10 @@ public:
     void setTheme(const QString& theme);                // Устанавливает тему (dark/light) и обновляет интерфейс
     void setUsername(const QString& username);          // Устанавливает имя пользователя для сохранения темы
 
+    // Геттеры для main.cpp
+    QString getCurrentRole() const { return currentRole; }
+    int getProductCount() const { return currentProducts.size(); }
+
 private slots:
     void loadCSV();                         // Загрузка CSV (оставлена для совместимости, не используется)
     void clearTable();                      // Очистка таблицы (только для администратора)

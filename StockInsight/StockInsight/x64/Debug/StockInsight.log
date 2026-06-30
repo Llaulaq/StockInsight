@@ -1,5 +1,5 @@
 ﻿   Qt/MSBuild: 3.5.0.0
    Qt: 6.8.0
   LoginDialog.cpp
-  RegisterDialog.cpp
+  main.cpp
   StockInsight.vcxproj -> D:\Dev\StockInsight\StockInsight\x64\Debug\StockInsight.exe
