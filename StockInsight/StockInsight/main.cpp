@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QScreen>
 #include <QThread>
+#include <QDir>
 
 #include "models/Product.h"
 #include "models/Analytics.h"
@@ -19,6 +20,15 @@
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
+
+    // Очищаем папку charts при запуске
+    QDir chartsDir("charts");
+    if (chartsDir.exists()) {
+        QStringList files = chartsDir.entryList(QDir::Files);
+        for (const QString& file : files) {
+            chartsDir.remove(file);
+        }
+    }
 
     // Создаём окна один раз для всего цикла
     LoginDialog login;

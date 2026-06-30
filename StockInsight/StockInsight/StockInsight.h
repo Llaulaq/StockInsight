@@ -41,6 +41,7 @@ private slots:
     void showCharts();                      // Показать графики
     void saveJSON();                        // Сохранение данных в JSON
     void exportJPEG();                      // Экспорт текущего графика в JPEG
+    void exportAllCharts();                 // Экспорт всех графиков в папку
     void sortByDays();                      // Сортировка таблицы по дням
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
@@ -54,6 +55,7 @@ private:
     QPushButton* loadBtn;                   // Кнопка загрузки CSV (не используется)
     QPushButton* saveBtn;                   // Сохранение JSON
     QPushButton* exportBtn;                 // Экспорт JPEG
+    QPushButton* exportAllBtn;              // Экспорт всех графиков
     QPushButton* clearBtn;                  // Очистка таблицы
     QPushButton* logoutBtn;                 // Выход из учётной записи
     QPushButton* refreshBtn;                // Обновление данных

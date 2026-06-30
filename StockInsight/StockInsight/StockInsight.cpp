@@ -69,6 +69,7 @@ StockInsight::StockInsight(QWidget* parent)
     // loadBtn = new QPushButton("📂 Загрузить CSV");  // ← УДАЛЕНО (больше не нужно)
     saveBtn = new QPushButton("💾 Сохранить JSON");
     exportBtn = new QPushButton("🖼️ Экспорт JPEG");
+    exportAllBtn = new QPushButton("📦 Экспорт всех");
     clearBtn = new QPushButton("🗑️ Очистить");
     logoutBtn = new QPushButton("🚪 Выйти");
 
@@ -90,6 +91,7 @@ StockInsight::StockInsight(QWidget* parent)
     // --- ПОДСКАЗКИ ДЛЯ КНОПОК ---
     saveBtn->setToolTip("Сохранить данные в JSON-файл");
     exportBtn->setToolTip("Экспортировать текущий график в JPEG");
+    exportAllBtn->setToolTip("Экспортировать все графики в папку");
     clearBtn->setToolTip("Очистить таблицу (только для администратора)");
     logoutBtn->setToolTip("Выйти из учётной записи");
     testBtn->setToolTip("Сгенерировать и показать графики");
@@ -100,6 +102,7 @@ StockInsight::StockInsight(QWidget* parent)
 
     buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
+    buttonLayout->addWidget(exportAllBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(testBtn);
     buttonLayout->addWidget(sortBtn);
@@ -188,6 +191,7 @@ StockInsight::StockInsight(QWidget* parent)
     connect(testBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
+    connect(exportAllBtn, &QPushButton::clicked, this, &StockInsight::exportAllCharts);
     connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
@@ -292,6 +296,7 @@ void StockInsight::setUserRole(const QString& role)
         // loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
+        exportAllBtn->setEnabled(true);
         clearBtn->setEnabled(true);
         refreshBtn->setEnabled(true);
     }
@@ -299,6 +304,7 @@ void StockInsight::setUserRole(const QString& role)
         // loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
+        exportAllBtn->setEnabled(true);
         clearBtn->setEnabled(false);
         refreshBtn->setEnabled(false);
     }
@@ -306,6 +312,7 @@ void StockInsight::setUserRole(const QString& role)
         // loadBtn->setEnabled(false);
         saveBtn->setEnabled(false);
         exportBtn->setEnabled(false);
+        exportAllBtn->setEnabled(false);
         clearBtn->setEnabled(false);
         refreshBtn->setEnabled(false);
     }
@@ -603,6 +610,70 @@ void StockInsight::exportJPEG()
     }
     else {
         QMessageBox::warning(this, "Ошибка", "Не удалось сохранить JPEG!");
+    }
+}
+
+// ЭКСПОРТ ВСЕХ ГРАФИКОВ В ПАПКУ
+void StockInsight::exportAllCharts()
+{
+    // Проверяем, есть ли данные
+    if (currentProducts.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта!");
+        return;
+    }
+
+    // Проверяем, существуют ли графики
+    QStringList imageFiles = {
+        "chart_stock_by_category.jpeg",
+        "chart_profit_by_category.jpeg",
+        "chart_monthly_sales.jpeg",
+        "chart_stale_products.jpeg"
+    };
+
+    // Проверяем, есть ли хотя бы один график
+    bool hasCharts = false;
+    for (const QString& file : imageFiles) {
+        QString fullPath = "charts/" + file;
+        if (QFile::exists(fullPath)) {
+            hasCharts = true;
+            break;
+        }
+    }
+
+    if (!hasCharts) {
+        QMessageBox::warning(this, "Ошибка", "Графики не найдены! Сначала создайте графики.");
+        return;
+    }
+
+    // Только после проверки предлагаем выбрать папку
+    QString dirPath = QFileDialog::getExistingDirectory(this, "Выберите папку для сохранения графиков");
+    if (dirPath.isEmpty()) return;
+
+    QStringList tabNames = { "Остатки", "Прибыль", "Продажи", "Залежалые" };
+    int saved = 0;
+
+    for (int i = 0; i < imageFiles.size(); ++i) {
+        QString sourcePath = "charts/" + imageFiles[i];
+
+        // Проверяем, существует ли файл
+        if (!QFile::exists(sourcePath)) {
+            continue;
+        }
+
+        // Формируем имя файла с понятным названием
+        QString destPath = dirPath + "/" + tabNames[i] + "_" + imageFiles[i];
+
+        if (QFile::copy(sourcePath, destPath)) {
+            saved++;
+        }
+    }
+
+    if (saved > 0) {
+        QMessageBox::information(this, "Готово",
+            "Экспортировано " + QString::number(saved) + " графиков в папку:\n" + dirPath);
+    }
+    else {
+        QMessageBox::warning(this, "Ошибка", "Не удалось экспортировать графики!");
     }
 }
 
