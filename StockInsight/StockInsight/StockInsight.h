@@ -8,6 +8,7 @@
 #include <QVector>
 #include <QVBoxLayout>
 #include <QComboBox>          
+#include <QLabel>
 
 #include "models/Analytics.h"
 #include "models/Product.h"
@@ -60,6 +61,13 @@ private:
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
 
+    // --- Виджеты статистики ---
+    QLabel* totalProductsLabel;             // Всего товаров
+    QLabel* totalProfitLabel;               // Суммарная прибыль
+    QLabel* frozenMoneyLabel;               // Заморожено денег
+    QLabel* deficitCountLabel;              // Дефицит
+    QLabel* staleCountLabel;                // Залежалые
+
     // --- Данные ---
     QString currentRole;                    // Текущая роль пользователя
     QString currentUsername;                // Имя текущего пользователя для сохранения темы
@@ -81,4 +89,5 @@ private:
     void loadChartsToTabs();                // Загружает готовые картинки графиков во вкладки
     void loadChartsFromAnalytics();         // Строит графики из данных Analytics
     void saveThemeToFile(const QString& theme);     // Сохраняет тему пользователя в users.json
+    void updateStatistics();                // Обновляет панель статистики
 };

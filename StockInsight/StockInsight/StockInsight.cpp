@@ -37,6 +37,32 @@ StockInsight::StockInsight(QWidget* parent)
 
     QVBoxLayout* mainLayout = new QVBoxLayout(central);
 
+    // --- Панель статистики ---
+    QHBoxLayout* statsLayout = new QHBoxLayout();
+
+    totalProductsLabel = new QLabel("📦 Всего: 0");
+    totalProfitLabel = new QLabel("💰 Прибыль: 0 ₽");
+    frozenMoneyLabel = new QLabel("❄️ Заморожено: 0 ₽");
+    deficitCountLabel = new QLabel("🔴 Дефицит: 0");
+    staleCountLabel = new QLabel("🟠 Залежалые: 0");
+
+    // Стили для статистики
+    QString statsStyle = "font-size: 13px; font-weight: bold; padding: 4px 10px;";
+    totalProductsLabel->setStyleSheet(statsStyle);
+    totalProfitLabel->setStyleSheet(statsStyle);
+    frozenMoneyLabel->setStyleSheet(statsStyle);
+    deficitCountLabel->setStyleSheet(statsStyle);
+    staleCountLabel->setStyleSheet(statsStyle);
+
+    statsLayout->addWidget(totalProductsLabel);
+    statsLayout->addWidget(totalProfitLabel);
+    statsLayout->addWidget(frozenMoneyLabel);
+    statsLayout->addWidget(deficitCountLabel);
+    statsLayout->addWidget(staleCountLabel);
+    statsLayout->addStretch();
+
+    mainLayout->addLayout(statsLayout);
+
     // --- Верхняя панель ---
     QHBoxLayout* buttonLayout = new QHBoxLayout();
 
@@ -166,6 +192,9 @@ StockInsight::StockInsight(QWidget* parent)
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
     connect(themeBtn, &QPushButton::clicked, this, &StockInsight::toggleTheme);
+
+    // Обновляем статистику при запуске
+    updateStatistics();
 }
 
 // ЗАГРУЗКА CSV (оставлена для совместимости, но не используется)
@@ -295,6 +324,7 @@ void StockInsight::clearTable()
     table->setRowCount(0);
     rowColors.clear();
     isTableCleared = true;   // ← запоминаем, что таблица очищена
+    updateStatistics();  // Обновляем статистику
     QMessageBox::information(this, "Готово", "Таблица очищена!");
 }
 
@@ -663,6 +693,9 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
 
     // Принудительно обновляем таблицу, чтобы цвета точно применились
     table->viewport()->update();
+
+    // Обновляем статистику
+    updateStatistics();
 }
 
 // ОБНОВЛЕНИЕ ДАННЫХ 
@@ -930,4 +963,38 @@ void StockInsight::onTabChanged(int index)
     if (page) {
         page->setCursor(Qt::PointingHandCursor);
     }
+}
+
+// ОБНОВЛЕНИЕ ПАНЕЛИ СТАТИСТИКИ
+void StockInsight::updateStatistics()
+{
+    if (currentProducts.isEmpty()) {
+        totalProductsLabel->setText("📦 Всего: 0");
+        totalProfitLabel->setText("💰 Прибыль: 0 ₽");
+        frozenMoneyLabel->setText("❄️ Заморожено: 0 ₽");
+        deficitCountLabel->setText("🔴 Дефицит: 0");
+        staleCountLabel->setText("🟠 Залежалые: 0");
+        return;
+    }
+
+    int total = currentProducts.size();
+    double totalProfit = 0;
+    double frozenMoney = 0;
+    int deficit = 0;
+    int stale = 0;
+
+    for (const Product& p : currentProducts) {
+        totalProfit += p.totalProfit;
+        if (p.isDeficit) deficit++;
+        if (p.isStale) {
+            stale++;
+            frozenMoney += p.quantity * p.purchasePrice;
+        }
+    }
+
+    totalProductsLabel->setText("📦 Всего: " + QString::number(total));
+    totalProfitLabel->setText("💰 Прибыль: " + QString::number(totalProfit, 'f', 0) + " ₽");
+    frozenMoneyLabel->setText("❄️ Заморожено: " + QString::number(frozenMoney, 'f', 0) + " ₽");
+    deficitCountLabel->setText("🔴 Дефицит: " + QString::number(deficit));
+    staleCountLabel->setText("🟠 Залежалые: " + QString::number(stale));
 }
