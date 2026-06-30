@@ -18,8 +18,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QSplitter>          
-#include <QComboBox>          
-#include <QFile>              
+#include <QComboBox>                        
 
 #include "models/Product.h"
 #include "models/Analytics.h"
@@ -49,13 +48,27 @@ StockInsight::StockInsight(QWidget* parent)
     QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");
     QPushButton* refreshBtn = new QPushButton("🔄 Обновить данные");
 
+    QPushButton* themeBtn = new QPushButton("🌙 Тёмная");
+    themeBtn->setToolTip("Переключить тему (светлая/тёмная)");
+
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
 
     // --- Фильтр по цвету (выпадающий список) ---
     colorFilter = new QComboBox();
-    colorFilter->addItems({ "Все", "🔴 Дефицит", "🟠 Залежалые", "🟢 Много товара" });
+    colorFilter->addItems({ "Все", "🔴 Дефицит", "🟠 Залежалые", "🟢 Много товара", "⚪ Обычные" });
     colorFilter->setMaximumWidth(150);
+
+    // --- ПОДСКАЗКИ ДЛЯ КНОПОК ---
+    saveBtn->setToolTip("Сохранить данные в JSON-файл");
+    exportBtn->setToolTip("Экспортировать текущий график в JPEG");
+    clearBtn->setToolTip("Очистить таблицу (только для администратора)");
+    logoutBtn->setToolTip("Выйти из учётной записи");
+    testBtn->setToolTip("Сгенерировать и показать графики");
+    sortBtn->setToolTip("Сортировать таблицу по количеству дней на складе");
+    refreshBtn->setToolTip("Обновить данные из CSV-файлов");
+    searchEdit->setToolTip("Введите текст для поиска по товарам");
+    colorFilter->setToolTip("Фильтровать строки по цвету");
 
     buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
@@ -67,6 +80,7 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addStretch();
     buttonLayout->addWidget(searchEdit);
     buttonLayout->addWidget(logoutBtn);
+    buttonLayout->addWidget(themeBtn);
 
     mainLayout->addLayout(buttonLayout);
 
@@ -77,6 +91,7 @@ StockInsight::StockInsight(QWidget* parent)
     table = new QTableWidget(0, 7);
     QStringList headers = { "Товар", "Категория", "Кол-во", "Цена зак.", "Цена прод.", "Дней", "Прибыль" };
     table->setHorizontalHeaderLabels(headers);
+    table->setAlternatingRowColors(true);
 
     // --- Разделитель между таблицей и графиками ---
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);
@@ -120,8 +135,8 @@ StockInsight::StockInsight(QWidget* parent)
     setWindowTitle("📊 StockInsight — Анализ склада");
     resize(1000, 700);
 
-    // --- Загрузка стилей ---
-    QFile styleFile("style.qss");
+    // --- Загрузка стилей (тёмная тема по умолчанию) ---
+    QFile styleFile("style_dark.qss");
     if (styleFile.open(QFile::ReadOnly)) {
         QString style = styleFile.readAll();
         this->setStyleSheet(style);
@@ -139,6 +154,7 @@ StockInsight::StockInsight(QWidget* parent)
     connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
+    connect(themeBtn, &QPushButton::clicked, this, &StockInsight::toggleTheme);
 }
 
 // ЗАГРУЗКА CSV (оставлена для совместимости, но не используется)
@@ -388,6 +404,9 @@ void StockInsight::filterByColor(int index)
         else if (filterText == "🟢 Много товара") {
             show = (rowColors[row] == "green");
         }
+        else if (filterText == "⚪ Обычные") {
+            show = (rowColors[row] == "normal");
+        }
         else {
             show = true;
         }
@@ -575,6 +594,9 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
     }
 
     // -- Применяем цвета --
+    // Определяем цвет для обычных товаров в зависимости от темы
+    QColor normalColor = isDarkTheme ? Qt::white : Qt::black;
+
     for (int r = 0; r < table->rowCount(); ++r) {
         QColor textColor;
         if (rowColors[r] == "deficit") {
@@ -587,7 +609,7 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
             textColor = Qt::darkGreen;
         }
         else {
-            textColor = Qt::white;
+            textColor = normalColor;   // ← белый в тёмной теме, чёрный в светлой
         }
 
         for (int col = 0; col < table->columnCount(); ++col) {
@@ -597,6 +619,9 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
             }
         }
     }
+
+    // Принудительно обновляем таблицу, чтобы цвета точно применились
+    table->viewport()->update();
 }
 
 // ОБНОВЛЕНИЕ ДАННЫХ 
@@ -664,6 +689,32 @@ void StockInsight::loadChartsFromAnalytics()
     }
 
     runPythonScript("temp_data.csv");
+}
+
+// ПЕРЕКЛЮЧЕНИЕ ТЕМ (тёмная/светлая)
+void StockInsight::toggleTheme()
+{
+    isDarkTheme = !isDarkTheme;
+
+    QString themeFile = isDarkTheme ? "style_dark.qss" : "style_light.qss";
+    QFile styleFile(themeFile);
+    if (styleFile.open(QFile::ReadOnly)) {
+        QString style = styleFile.readAll();
+        this->setStyleSheet(style);
+        styleFile.close();
+    }
+
+    // Меняем текст кнопки
+    QPushButton* btn = qobject_cast<QPushButton*>(sender());
+    if (btn) {
+        btn->setText(isDarkTheme ? "🌙 Тёмная" : "☀️ Светлая");
+    }
+
+    // Обновляем таблицу, чтобы цвета текста переключились
+    // Просто переприменяем текущие данные
+    if (!currentProducts.isEmpty()) {
+        setAnalytics(currentAnalytics, currentProducts);
+    }
 }
 
 // ВЫХОД ИЗ УЧЁТНОЙ ЗАПИСИ

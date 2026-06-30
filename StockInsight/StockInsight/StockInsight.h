@@ -34,6 +34,7 @@ private slots:
     void sortByDays();                      // Сортировка таблицы по дням
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
     void refreshData();                     // Обновить данные из CSV-файлов
+    void toggleTheme();
 
 private:
     QTableWidget* table;
@@ -51,7 +52,8 @@ private:
     QTabWidget* tabs;                       // Вкладки для графиков
     QVector<QVBoxLayout*> chartLayouts;     // Layout'ы для вкладок, чтобы добавлять картинки
 
-    // --- НОВЫЕ ПОЛЯ ДЛЯ ДАННЫХ ОТ БЭКЕНДА ---
+    bool isDarkTheme = true;
+
     Analytics currentAnalytics;             // Хранит аналитику от Димы
     QVector<Product> currentProducts;       // Хранит список товаров от Димы
 

@@ -28,10 +28,12 @@ QPushButton {
     font-size: 13px;
     font-weight: 500;
     font-family: 'Segoe UI', 'Arial', sans-serif;
+    transition: all 0.2s;
 }
 
 QPushButton:hover {
     background-color: #45475a;
+    transform: scale(1.05);
 }
 
 QPushButton:pressed {
@@ -146,7 +148,6 @@ QComboBox QAbstractItemView {
 /* ТАБЛИЦА */
 QTableWidget {
     background-color: #1e1e2f;
-    color: #cdd6f4;
     gridline-color: #313244;
     font-family: 'Segoe UI', 'Arial', sans-serif;
     font-size: 13px;
@@ -165,8 +166,16 @@ QTableWidget::item:selected {
     color: #cdd6f4;
 }
 
+QTableWidget::item:alternate {
+    background-color: #2a2a3a;
+}
+
 /* ЗАГОЛОВКИ ТАБЛИЦЫ */
-QHeaderView::section {
+QTableWidget QHeaderView {
+    background-color: #313244;
+}
+
+QTableWidget QHeaderView::section {
     background-color: #313244;
     color: #a6e3a1;
     font-weight: bold;
@@ -175,12 +184,9 @@ QHeaderView::section {
     font-size: 13px;
 }
 
-QHeaderView::section:checked {
-    background-color: #45475a;
-}
-
 QTableCornerButton::section {
     background-color: #313244;
+    border: none;
 }
 
 /* ВКЛАДКИ ДЛЯ ГРАФИКОВ */
