@@ -122,7 +122,9 @@ StockInsight::StockInsight(QWidget* parent)
     table = new QTableWidget(0, 7);
     QStringList headers = { "Товар", "Категория", "Кол-во", "Цена зак.", "Цена прод.", "Дней", "Прибыль" };
     table->setHorizontalHeaderLabels(headers);
+
     table->setAlternatingRowColors(true);
+    table->setMouseTracking(true);
 
     // --- Разделитель между таблицей и графиками ---
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);

@@ -115,6 +115,11 @@ QTableWidget::item:alternate {
     background-color: #2a2a3a;
 }
 
+QTableWidget::item:hover {
+    background-color: #45475a;
+}
+
+
 /* ЗАГОЛОВКИ ТАБЛИЦЫ */
 QTableWidget QHeaderView {
     background-color: #313244;
