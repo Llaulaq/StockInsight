@@ -28,7 +28,7 @@
 
 // КОНСТРУКТОР
 StockInsight::StockInsight(QWidget* parent)
-    : QMainWindow(parent), currentCsvPath("")
+    : QMainWindow(parent), currentCsvPath(""), isTableCleared(false)
 {
     QWidget* central = new QWidget(this);
     setCentralWidget(central);
@@ -46,7 +46,7 @@ StockInsight::StockInsight(QWidget* parent)
 
     QPushButton* testBtn = new QPushButton("📈 Показать графики");
     QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");
-    QPushButton* refreshBtn = new QPushButton("🔄 Обновить данные");
+    refreshBtn = new QPushButton("🔄 Обновить данные");
 
     QPushButton* themeBtn = new QPushButton("🌙 Тёмная");
     themeBtn->setToolTip("Переключить тему (светлая/тёмная)");
@@ -253,26 +253,37 @@ void StockInsight::setUserRole(const QString& role)
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
         clearBtn->setEnabled(true);
+        refreshBtn->setEnabled(true);
     }
     else if (role == "analyst") {
         // loadBtn->setEnabled(true);
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
         clearBtn->setEnabled(false);
+        refreshBtn->setEnabled(false);   // ← аналитик НЕ может обновлять данные
     }
     else if (role == "guest") {
         // loadBtn->setEnabled(false);
         saveBtn->setEnabled(false);
         exportBtn->setEnabled(false);
         clearBtn->setEnabled(false);
+        refreshBtn->setEnabled(false);
     }
 }
 
 // ОЧИСТКА ТАБЛИЦЫ (только для админа)
 void StockInsight::clearTable()
 {
+    // Проверяем, есть ли у пользователя права
+    if (currentRole != "admin") {
+        QMessageBox::warning(this, "Доступ запрещён",
+            "Только администратор может очищать таблицу!");
+        return;
+    }
+
     table->setRowCount(0);
     rowColors.clear();
+    isTableCleared = true;   // ← запоминаем, что таблица очищена
     QMessageBox::information(this, "Готово", "Таблица очищена!");
 }
 
@@ -297,6 +308,7 @@ void StockInsight::onSearchTextChanged(const QString& text)
             }
         }
 
+        // Скрываем или показываем строку
         table->setRowHidden(row, !isMatch);
     }
 }
@@ -367,6 +379,12 @@ void StockInsight::loadChartsToTabs()
 // КНОПКА "ПОКАЗАТЬ ГРАФИКИ"
 void StockInsight::showCharts()
 {
+    // Проверяем, есть ли данные
+    if (currentProducts.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для построения графиков! Сначала загрузите CSV.");
+        return;
+    }
+
     if (!currentProducts.isEmpty()) {
         loadChartsFromAnalytics();
         return;
@@ -503,6 +521,12 @@ void StockInsight::saveJSON()
 // ЭКСПОРТ ТЕКУЩЕГО ГРАФИКА В JPEG
 void StockInsight::exportJPEG()
 {
+    // Проверяем, есть ли данные
+    if (currentProducts.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта! Сначала загрузите CSV.");
+        return;
+    }
+
     int currentTab = tabs->currentIndex();
     if (currentTab < 0 || currentTab >= chartLayouts.size()) {
         QMessageBox::warning(this, "Ошибка", "Нет активной вкладки с графиком.");
@@ -545,6 +569,11 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
 {
     currentAnalytics = data;
     currentProducts = products;
+
+    // Если таблица была очищена — не заполняем её заново
+    if (isTableCleared) {
+        return;
+    }
 
     table->setRowCount(0);
     rowColors.clear();
@@ -609,7 +638,7 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
             textColor = Qt::darkGreen;
         }
         else {
-            textColor = normalColor;   // ← белый в тёмной теме, чёрный в светлой
+            textColor = normalColor;
         }
 
         for (int col = 0; col < table->columnCount(); ++col) {
@@ -627,7 +656,13 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
 // ОБНОВЛЕНИЕ ДАННЫХ 
 void StockInsight::refreshData()
 {
-    // Получаем путь к папке с .exe
+    // Проверяем роль
+    if (currentRole != "admin") {
+        QMessageBox::warning(this, "Доступ запрещён",
+            "Только администратор может обновлять данные!");
+        return;
+    }
+
     QString exePath = QCoreApplication::applicationDirPath();
     QString productsPath = exePath + "/products.csv";
     QString salesPath = exePath + "/sales.csv";
@@ -647,6 +682,9 @@ void StockInsight::refreshData()
     auto salesMap = CsvParser::parseSales(salesPath);
     DataMerger::merge(products, salesMap);
     Analytics analytics = AnalyticsEngine::calculate(products);
+
+    // При загрузке новых данных сбрасываем флаг очистки
+    isTableCleared = false;
 
     // Обновляем таблицу и графики
     setAnalytics(analytics, products);
@@ -710,9 +748,8 @@ void StockInsight::toggleTheme()
         btn->setText(isDarkTheme ? "🌙 Тёмная" : "☀️ Светлая");
     }
 
-    // Обновляем таблицу, чтобы цвета текста переключились
-    // Просто переприменяем текущие данные
-    if (!currentProducts.isEmpty()) {
+    // Если таблица НЕ была очищена и есть данные — обновляем цвета
+    if (!isTableCleared && !currentProducts.isEmpty()) {
         setAnalytics(currentAnalytics, currentProducts);
     }
 }
@@ -720,5 +757,5 @@ void StockInsight::toggleTheme()
 // ВЫХОД ИЗ УЧЁТНОЙ ЗАПИСИ
 void StockInsight::logout()
 {
-    this->close();
+    this->close();  // Закрывает главное окно
 }

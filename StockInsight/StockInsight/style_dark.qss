@@ -268,3 +268,25 @@ QScrollBar::add-line:horizontal,
 QScrollBar::sub-line:horizontal {
     width: 0px;
 }
+
+/* СООБЩЕНИЯ (QMessageBox) */
+QMessageBox {
+    background-color: #1e1e2f;
+    color: #cdd6f4;
+}
+
+QMessageBox QLabel {
+    color: #cdd6f4;
+}
+
+QMessageBox QPushButton {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #45475a;
+}
