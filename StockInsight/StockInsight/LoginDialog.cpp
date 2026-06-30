@@ -3,12 +3,21 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMessageBox>
+#include <QFile>
 
 LoginDialog::LoginDialog(QWidget* parent)
     : QDialog(parent), role("guest")
 {
     // Загружаем пользователей из файла
     loadUsersFromFile();
+
+    // Загружаем стили (тёмная тема по умолчанию)
+    QFile styleFile("styles/dark.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        QString style = styleFile.readAll();
+        this->setStyleSheet(style);
+        styleFile.close();
+    }
 
     setWindowTitle("🔐 Авторизация");
     resize(300, 220);
@@ -31,6 +40,10 @@ LoginDialog::LoginDialog(QWidget* parent)
     loginButton = new QPushButton("✅ Войти");
     registerButton = new QPushButton("📝 Регистрация");
     cancelButton = new QPushButton("❌ Отмена");
+
+    loginButton->setObjectName("loginButton");
+    registerButton->setObjectName("registerButton");
+    cancelButton->setObjectName("cancelButton");
 
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(loginButton);
@@ -72,6 +85,8 @@ void LoginDialog::onLoginClicked()
 // Обработчик нажатия кнопки "Регистрация"
 void LoginDialog::onRegisterClicked()
 {
+    this->hide();  // ← скрываем окно входа
+
     RegisterDialog reg;
     if (reg.exec() == QDialog::Accepted) {
         QString username = reg.getUsername();
@@ -81,7 +96,7 @@ void LoginDialog::onRegisterClicked()
         // Добавляем нового пользователя
         users[username] = role;
         passwords[username] = password;
-        userThemes[username] = "dark";   // ← тема по умолчанию
+        userThemes[username] = "dark";
         saveUsersToFile();
 
         QMessageBox::information(this, "Регистрация успешна",
@@ -89,6 +104,8 @@ void LoginDialog::onRegisterClicked()
             "Роль: " + role + "\n\n"
             "Теперь вы можете войти.");
     }
+
+    this->show();  // ← показываем окно входа обратно
 }
 
 // Возвращает роль текущего пользователя
@@ -111,6 +128,7 @@ QString LoginDialog::getUsername() const
 {
     return currentUser;
 }
+
 
 // РАБОТА С ФАЙЛОМ users.json
 

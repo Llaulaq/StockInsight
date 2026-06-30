@@ -290,3 +290,105 @@ QMessageBox QPushButton {
 QMessageBox QPushButton:hover {
     background-color: #45475a;
 }
+
+/* ОКНО ВХОДА И РЕГИСТРАЦИИ */
+QDialog {
+    background-color: #1e1e2f;
+}
+
+QDialog QLabel {
+    color: #cdd6f4;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+QDialog QLineEdit {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+}
+
+QDialog QLineEdit:focus {
+    border: 1px solid #89b4fa;
+}
+
+QDialog QLineEdit::placeholder {
+    color: #6c7086;
+}
+
+/* КНОПКА "ВОЙТИ" */
+QDialog QPushButton#loginButton {
+    background-color: #89b4fa;
+    color: #1e1e2f;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+}
+
+QDialog QPushButton#loginButton:hover {
+    background-color: #7aafff;
+}
+
+/* КНОПКА "РЕГИСТРАЦИЯ" */
+QDialog QPushButton#registerButton {
+    background-color: #a6e3a1;
+    color: #1e1e2f;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+}
+
+QDialog QPushButton#registerButton:hover {
+    background-color: #94d98e;
+}
+
+/* КНОПКА "ОТМЕНА" */
+QDialog QPushButton#cancelButton {
+    background-color: #f38ba8;
+    color: #1e1e2f;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+}
+
+QDialog QPushButton#cancelButton:hover {
+    background-color: #f28b9c;
+}
+
+QDialog QLabel#statusLabel {
+    color: #f38ba8;
+    font-size: 12px;
+}
+
+QDialog QComboBox {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+QDialog QComboBox:hover {
+    border: 1px solid #89b4fa;
+}
+
+QDialog QComboBox::drop-down {
+    border: none;
+}
+
+QDialog QComboBox QAbstractItemView {
+    background-color: #313244;
+    color: #cdd6f4;
+    selection-background-color: #45475a;
+    border-radius: 8px;
+}

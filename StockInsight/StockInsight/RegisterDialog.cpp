@@ -2,10 +2,19 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMessageBox>
+#include <QFile>
 
 RegisterDialog::RegisterDialog(QWidget* parent)
     : QDialog(parent)
 {
+    // Загружаем стили (тёмная тема по умолчанию)
+    QFile styleFile("styles/dark.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        QString style = styleFile.readAll();
+        this->setStyleSheet(style);
+        styleFile.close();
+    }
+
     setWindowTitle("📝 Регистрация");
     resize(350, 250);
 
@@ -39,6 +48,9 @@ RegisterDialog::RegisterDialog(QWidget* parent)
     // --- Кнопки ---
     registerButton = new QPushButton("✅ Зарегистрироваться");
     cancelButton = new QPushButton("❌ Отмена");
+
+    registerButton->setObjectName("registerButton");
+    cancelButton->setObjectName("cancelButton");
 
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(registerButton);
