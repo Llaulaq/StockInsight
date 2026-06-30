@@ -9,7 +9,6 @@
 #include <QCoreApplication>
 #include <QScreen>
 #include <QThread>
-#include <QDir>
 
 #include "models/Product.h"
 #include "models/Analytics.h"

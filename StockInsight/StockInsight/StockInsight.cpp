@@ -284,6 +284,7 @@ void StockInsight::loadCSV()
     }
 
     file.close();
+    table->resizeColumnsToContents();
     QMessageBox::information(this, "Готово", "Загружено " + QString::number(row) + " товаров!");
 }
 
@@ -764,6 +765,7 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
 
     // Принудительно обновляем таблицу, чтобы цвета точно применились
     table->viewport()->update();
+    table->resizeColumnsToContents();
 
     // Обновляем статистику
     updateStatistics();
@@ -804,6 +806,7 @@ void StockInsight::refreshData()
 
     // Обновляем таблицу и графики
     setAnalytics(analytics, products);
+    table->resizeColumnsToContents();
 
     // Если есть данные — обновляем графики
     if (!products.isEmpty()) {
