@@ -19,6 +19,8 @@
 #include <QJsonArray>
 #include <QSplitter>          
 #include <QComboBox>                        
+#include <QMouseEvent>
+#include <QDialog>
 
 #include "models/Product.h"
 #include "models/Analytics.h"
@@ -122,6 +124,15 @@ StockInsight::StockInsight(QWidget* parent)
         chartLayouts.append(layout);
     }
     chartsWrapperLayout->addWidget(tabs);
+
+    // Подключаем сигнал смены вкладки для установки курсора
+    connect(tabs, &QTabWidget::currentChanged, this, &StockInsight::onTabChanged);
+
+    // Устанавливаем курсор-руку для всех вкладок
+    for (int i = 0; i < tabs->count(); ++i) {
+        QWidget* page = tabs->widget(i);
+        page->setCursor(Qt::PointingHandCursor);
+    }
 
     // Добавляем оба виджета в разделитель
     splitter->addWidget(tableWrapper);
@@ -368,6 +379,8 @@ void StockInsight::loadChartsToTabs()
 
             label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             label->setAlignment(Qt::AlignCenter);
+            // Устанавливаем фильтр событий для обработки клика
+            label->installEventFilter(this);
         }
         else {
             label->setText("График не найден: " + imagePath);
@@ -830,4 +843,91 @@ void StockInsight::toggleTheme()
 void StockInsight::logout()
 {
     this->close();  // Закрывает главное окно
+}
+
+// ОБРАБОТЧИК СОБЫТИЙ ДЛЯ КЛИКА ПО ГРАФИКУ
+bool StockInsight::eventFilter(QObject* obj, QEvent* event)
+{
+    if (event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        if (mouseEvent->button() == Qt::LeftButton) {
+            QLabel* label = qobject_cast<QLabel*>(obj);
+            if (label) {
+                QPixmap pixmap = label->pixmap();  
+                if (!pixmap.isNull()) {
+                    onChartClicked();
+                    return true;
+                }
+            }
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+// ОТКРЫТИЕ ГРАФИКА В ОТДЕЛЬНОМ ОКНЕ
+void StockInsight::onChartClicked()
+{
+    int currentTab = tabs->currentIndex();
+    if (currentTab < 0 || currentTab >= chartLayouts.size()) {
+        return;
+    }
+
+    QLayout* layout = chartLayouts[currentTab];
+    if (!layout || layout->count() == 0) {
+        return;
+    }
+
+    QWidget* widget = layout->itemAt(0)->widget();
+    QLabel* label = qobject_cast<QLabel*>(widget);
+    if (!label) {
+        return;
+    }
+
+    QPixmap pixmap = label->pixmap();
+    if (pixmap.isNull()) {
+        return;
+    }
+
+    // Создаём отдельное окно для увеличенного графика
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("📊 " + tabs->tabText(currentTab));
+    dialog->setModal(false);
+    dialog->resize(900, 700);
+
+    QVBoxLayout* dialogLayout = new QVBoxLayout(dialog);
+
+    QLabel* bigLabel = new QLabel();
+    // Масштабируем картинку под размер окна с сохранением пропорций
+    QPixmap scaled = pixmap.scaled(880, 680, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    bigLabel->setPixmap(scaled);
+    bigLabel->setAlignment(Qt::AlignCenter);
+    bigLabel->setStyleSheet("background-color: #1e1e2f;");
+
+    dialogLayout->addWidget(bigLabel);
+
+    // Кнопка закрытия
+    QPushButton* closeBtn = new QPushButton("✖ Закрыть");
+    closeBtn->setFixedWidth(120);
+    QHBoxLayout* btnLayout = new QHBoxLayout();
+    btnLayout->addStretch();
+    btnLayout->addWidget(closeBtn);
+    btnLayout->addStretch();
+    dialogLayout->addLayout(btnLayout);
+
+    connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::accept);
+
+    // Закрытие по Escape
+    connect(dialog, &QDialog::rejected, dialog, &QDialog::accept);
+
+    dialog->exec();
+    delete dialog;
+}
+
+// УСТАНОВКА КУРСОРА ПРИ СМЕНЕ ВКЛАДКИ
+void StockInsight::onTabChanged(int index)
+{
+    QWidget* page = tabs->widget(index);
+    if (page) {
+        page->setCursor(Qt::PointingHandCursor);
+    }
 }

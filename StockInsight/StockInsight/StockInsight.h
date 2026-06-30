@@ -29,6 +29,9 @@ public:
     QString getCurrentRole() const { return currentRole; }
     int getProductCount() const { return currentProducts.size(); }
 
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;  // Обработчик событий для клика по графику
+
 private slots:
     void loadCSV();                         // Загрузка CSV (оставлена для совместимости, не используется)
     void clearTable();                      // Очистка таблицы (только для администратора)
@@ -41,6 +44,8 @@ private slots:
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
     void toggleTheme();                     // Переключение тёмной/светлой темы
+    void onChartClicked();                  // Обработчик клика по графику (открытие в отдельном окне)
+    void onTabChanged(int index);           // Установка курсора при смене вкладки
 
 private:
     // --- Виджеты интерфейса ---
