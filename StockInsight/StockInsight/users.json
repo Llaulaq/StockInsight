@@ -3,7 +3,7 @@
         {
             "password": "1234",
             "role": "admin",
-            "theme": "light",
+            "theme": "dark",
             "username": "admin"
         },
         {
@@ -15,7 +15,13 @@
         {
             "password": "1234",
             "role": "Аналитик",
-            "theme": "light",
+            "theme": "dark",
+            "username": "da"
+        },
+        {
+            "password": "1234",
+            "role": "Аналитик",
+            "theme": "dark",
             "username": "dasha"
         },
         {
@@ -35,6 +41,12 @@
             "role": "guest",
             "theme": "dark",
             "username": "guest"
+        },
+        {
+            "password": "1234",
+            "role": "Админ",
+            "theme": "dark",
+            "username": "ot"
         }
     ]
 }

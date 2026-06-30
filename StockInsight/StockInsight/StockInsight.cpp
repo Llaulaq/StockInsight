@@ -208,8 +208,6 @@ StockInsight::StockInsight(QWidget* parent)
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
     connect(themeBtn, &QPushButton::clicked, this, &StockInsight::toggleTheme);
-    connect(categoryFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByCategory);
-    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
 
     // Обновляем статистику при запуске
     updateStatistics();

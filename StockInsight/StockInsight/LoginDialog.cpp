@@ -118,9 +118,17 @@ QString LoginDialog::getRole() const
 // Возвращает тему текущего пользователя
 QString LoginDialog::getTheme() const
 {
-    if (userThemes.contains(currentUser)) {
+    // Сначала проверяем currentUser (после входа)
+    if (!currentUser.isEmpty() && userThemes.contains(currentUser)) {
         return userThemes[currentUser];
     }
+
+    // Если currentUser пуст, проверяем по введённому логину
+    QString user = usernameEdit->text().trimmed();
+    if (!user.isEmpty() && userThemes.contains(user)) {
+        return userThemes[user];
+    }
+
     return "dark";
 }
 
@@ -211,24 +219,23 @@ void LoginDialog::createDefaultUsersFile()
 }
 
 // Очищаем статус и поля при показе окна
-// Очищаем статус и поля при показе окна
 void LoginDialog::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
+
+    // Перезагружаем данные из файла перед показом
+    loadUsersFromFile();
+
     statusLabel->clear();
     usernameEdit->clear();
     passwordEdit->clear();
     usernameEdit->setFocus();
 
-    // Применяем тему пользователя (если она есть)
-    if (!currentUser.isEmpty() && userThemes.contains(currentUser)) {
-        QString theme = userThemes[currentUser];
-        QString themeFile = (theme == "light") ? "styles/light.qss" : "styles/dark.qss";
-        QFile styleFile(themeFile);
-        if (styleFile.open(QFile::ReadOnly)) {
-            QString style = styleFile.readAll();
-            this->setStyleSheet(style);
-            styleFile.close();
-        }
+    // Всегда загружаем тёмную тему для окна входа
+    QFile styleFile("styles/dark.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        QString style = styleFile.readAll();
+        this->setStyleSheet(style);
+        styleFile.close();
     }
 }
