@@ -21,6 +21,7 @@
 #include <QComboBox>                        
 #include <QMouseEvent>
 #include <QDialog>
+#include <QHeaderView>
 
 #include "models/Product.h"
 #include "models/Analytics.h"
@@ -74,7 +75,6 @@ StockInsight::StockInsight(QWidget* parent)
     logoutBtn = new QPushButton("🚪 Выйти");
 
     QPushButton* testBtn = new QPushButton("📈 Показать графики");
-    QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");
     refreshBtn = new QPushButton("🔄 Обновить данные");
 
     themeBtn = new QPushButton("🌙 Тёмная");
@@ -95,7 +95,6 @@ StockInsight::StockInsight(QWidget* parent)
     clearBtn->setToolTip("Очистить таблицу (только для администратора)");
     logoutBtn->setToolTip("Выйти из учётной записи");
     testBtn->setToolTip("Сгенерировать и показать графики");
-    sortBtn->setToolTip("Сортировать таблицу по количеству дней на складе");
     refreshBtn->setToolTip("Обновить данные из CSV-файлов");
     searchEdit->setToolTip("Введите текст для поиска по товарам");
     colorFilter->setToolTip("Фильтровать строки по цвету");
@@ -105,7 +104,6 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addWidget(exportAllBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(testBtn);
-    buttonLayout->addWidget(sortBtn);
     buttonLayout->addWidget(colorFilter);
     buttonLayout->addWidget(refreshBtn);
     buttonLayout->addStretch();
@@ -122,9 +120,11 @@ StockInsight::StockInsight(QWidget* parent)
     table = new QTableWidget(0, 7);
     QStringList headers = { "Товар", "Категория", "Кол-во", "Цена зак.", "Цена прод.", "Дней", "Прибыль" };
     table->setHorizontalHeaderLabels(headers);
-
     table->setAlternatingRowColors(true);
     table->setMouseTracking(true);
+    
+    // Подключаем сортировку по клику на заголовок
+    connect(table->horizontalHeader(), &QHeaderView::sectionClicked, this, &StockInsight::onHeaderClicked);
 
     // --- Разделитель между таблицей и графиками ---
     QSplitter* splitter = new QSplitter(Qt::Vertical, this);
@@ -194,7 +194,6 @@ StockInsight::StockInsight(QWidget* parent)
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
     connect(exportAllBtn, &QPushButton::clicked, this, &StockInsight::exportAllCharts);
-    connect(sortBtn, &QPushButton::clicked, this, &StockInsight::sortByDays);
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
     connect(themeBtn, &QPushButton::clicked, this, &StockInsight::toggleTheme);
@@ -450,14 +449,6 @@ void StockInsight::showCharts()
     runPythonScript(currentCsvPath);
 }
 
-// СОРТИРОВКА ПО ДНЯМ
-void StockInsight::sortByDays()
-{
-    static bool ascending = true;
-    table->sortItems(5, ascending ? Qt::AscendingOrder : Qt::DescendingOrder);
-    ascending = !ascending;
-}
-
 // ФИЛЬТР ПО ЦВЕТУ
 void StockInsight::filterByColor(int index)
 {
@@ -699,10 +690,15 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
         table->insertRow(row);
 
         // -- Текстовые поля --
-        table->setItem(row, 0, new QTableWidgetItem(p.name));
-        table->setItem(row, 1, new QTableWidgetItem(p.category));
+        QTableWidgetItem* nameItem = new QTableWidgetItem(p.name);
+        nameItem->setData(Qt::DisplayRole, p.name);
+        table->setItem(row, 0, nameItem);
 
-        // -- Числовые поля (для корректной сортировки) --
+        QTableWidgetItem* categoryItem = new QTableWidgetItem(p.category);
+        categoryItem->setData(Qt::DisplayRole, p.category);
+        table->setItem(row, 1, categoryItem);
+
+        // -- Числовые поля --
         QTableWidgetItem* qtyItem = new QTableWidgetItem();
         qtyItem->setData(Qt::DisplayRole, p.quantity);
         table->setItem(row, 2, qtyItem);
@@ -1073,4 +1069,21 @@ void StockInsight::updateStatistics()
     frozenMoneyLabel->setText("❄️ Заморожено: " + QString::number(frozenMoney, 'f', 0) + " ₽");
     deficitCountLabel->setText("🔴 Дефицит: " + QString::number(deficit));
     staleCountLabel->setText("🟠 Залежалые: " + QString::number(stale));
+}
+
+// СОРТИРОВКА ПО КЛИКУ НА ЗАГОЛОВОК
+void StockInsight::onHeaderClicked(int column)
+{
+    static int lastColumn = -1;
+    static Qt::SortOrder order = Qt::AscendingOrder;
+
+    if (lastColumn == column) {
+        order = (order == Qt::AscendingOrder) ? Qt::DescendingOrder : Qt::AscendingOrder;
+    }
+    else {
+        lastColumn = column;
+        order = Qt::AscendingOrder;
+    }
+
+    table->sortItems(column, order);
 }

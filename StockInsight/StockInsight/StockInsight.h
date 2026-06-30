@@ -42,12 +42,12 @@ private slots:
     void saveJSON();                        // Сохранение данных в JSON
     void exportJPEG();                      // Экспорт текущего графика в JPEG
     void exportAllCharts();                 // Экспорт всех графиков в папку
-    void sortByDays();                      // Сортировка таблицы по дням
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
     void toggleTheme();                     // Переключение тёмной/светлой темы
     void onChartClicked();                  // Обработчик клика по графику (открытие в отдельном окне)
     void onTabChanged(int index);           // Установка курсора при смене вкладки
+    void onHeaderClicked(int column);       // Сортировка по клику на заголовок
 
 private:
     // --- Виджеты интерфейса ---

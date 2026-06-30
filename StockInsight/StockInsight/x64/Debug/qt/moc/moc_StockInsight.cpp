@@ -47,13 +47,14 @@ constexpr auto qt_meta_stringdata_CLASSStockInsightENDCLASS = QtMocHelpers::stri
     "saveJSON",
     "exportJPEG",
     "exportAllCharts",
-    "sortByDays",
     "filterByColor",
     "index",
     "refreshData",
     "toggleTheme",
     "onChartClicked",
-    "onTabChanged"
+    "onTabChanged",
+    "onHeaderClicked",
+    "column"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -82,12 +83,12 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSStockInsightENDCLASS[] = {
        8,    0,  105,    2, 0x08,    7 /* Private */,
        9,    0,  106,    2, 0x08,    8 /* Private */,
       10,    0,  107,    2, 0x08,    9 /* Private */,
-      11,    0,  108,    2, 0x08,   10 /* Private */,
-      12,    1,  109,    2, 0x08,   11 /* Private */,
+      11,    1,  108,    2, 0x08,   10 /* Private */,
+      13,    0,  111,    2, 0x08,   12 /* Private */,
       14,    0,  112,    2, 0x08,   13 /* Private */,
       15,    0,  113,    2, 0x08,   14 /* Private */,
-      16,    0,  114,    2, 0x08,   15 /* Private */,
-      17,    1,  115,    2, 0x08,   16 /* Private */,
+      16,    1,  114,    2, 0x08,   15 /* Private */,
+      17,    1,  117,    2, 0x08,   17 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -98,12 +99,12 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSStockInsightENDCLASS[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   13,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   12,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   13,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   12,
+    QMetaType::Void, QMetaType::Int,   18,
 
        0        // eod
 };
@@ -134,8 +135,6 @@ Q_CONSTINIT const QMetaObject StockInsight::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'exportAllCharts'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'sortByDays'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'filterByColor'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<int, std::false_type>,
@@ -146,6 +145,9 @@ Q_CONSTINIT const QMetaObject StockInsight::staticMetaObject = { {
         // method 'onChartClicked'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'onTabChanged'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
+        // method 'onHeaderClicked'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<int, std::false_type>
     >,
@@ -166,12 +168,12 @@ void StockInsight::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 5: _t->saveJSON(); break;
         case 6: _t->exportJPEG(); break;
         case 7: _t->exportAllCharts(); break;
-        case 8: _t->sortByDays(); break;
-        case 9: _t->filterByColor((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 10: _t->refreshData(); break;
-        case 11: _t->toggleTheme(); break;
-        case 12: _t->onChartClicked(); break;
-        case 13: _t->onTabChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 8: _t->filterByColor((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 9: _t->refreshData(); break;
+        case 10: _t->toggleTheme(); break;
+        case 11: _t->onChartClicked(); break;
+        case 12: _t->onTabChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 13: _t->onHeaderClicked((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         default: ;
         }
     }
