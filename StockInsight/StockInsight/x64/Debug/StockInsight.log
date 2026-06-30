@@ -1,7 +1,4 @@
 ﻿   Qt/MSBuild: 3.5.0.0
    Qt: 6.8.0
-  moc StockInsight.h
-  StockInsight.cpp
-  main.cpp
-  moc_StockInsight.cpp
+  LoginDialog.cpp
   StockInsight.vcxproj -> D:\Dev\StockInsight\StockInsight\x64\Debug\StockInsight.exe
