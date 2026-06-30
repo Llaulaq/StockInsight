@@ -92,7 +92,7 @@ StockInsight::StockInsight(QWidget* parent)
 
     // --- Фильтр по цвету (выпадающий список) ---
     colorFilter = new QComboBox();
-    colorFilter->addItems({ "Все", "🔴 Дефицит", "🟠 Залежалые", "🟢 Много товара", "⚪ Обычные" });
+    colorFilter->addItems({ "Все товары", "⚠️ Дефицит", "⏳ Залежалые", "📦 Избыток", "✅ Норма" });
     colorFilter->setMaximumWidth(150);
 
     // --- ПОДСКАЗКИ ДЛЯ КНОПОК ---
@@ -485,16 +485,16 @@ void StockInsight::filterByColor(int index)
     for (int row = 0; row < table->rowCount(); ++row) {
         bool show = true;
 
-        if (filterText == "🔴 Дефицит") {
+        if (filterText == "⚠️ Дефицит") {
             show = (rowColors[row] == "deficit");
         }
-        else if (filterText == "🟠 Залежалые") {
+        else if (filterText == "⏳ Залежалые") {
             show = (rowColors[row] == "stale");
         }
-        else if (filterText == "🟢 Много товара") {
+        else if (filterText == "📦 Избыток") {
             show = (rowColors[row] == "green");
         }
-        else if (filterText == "⚪ Обычные") {
+        else if (filterText == "✅ Норма") {
             show = (rowColors[row] == "normal");
         }
         else {
