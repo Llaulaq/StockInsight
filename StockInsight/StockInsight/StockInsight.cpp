@@ -122,6 +122,7 @@ StockInsight::StockInsight(QWidget* parent)
     table->setHorizontalHeaderLabels(headers);
     table->setAlternatingRowColors(true);
     table->setMouseTracking(true);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     
     // Подключаем сортировку по клику на заголовок
     connect(table->horizontalHeader(), &QHeaderView::sectionClicked, this, &StockInsight::onHeaderClicked);
