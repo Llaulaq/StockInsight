@@ -15,11 +15,13 @@ class LoginDialog : public QDialog
 
 public:
     LoginDialog(QWidget* parent = nullptr);
-    QString getRole() const; // Возвращает роль пользователя
+    QString getRole() const;        // Возвращает роль пользователя
+    QString getTheme() const;       // Возвращает тему пользователя (dark/light)
+    QString getUsername() const;    // Возвращает имя текущего пользователя
 
 private slots:
-    void onLoginClicked();   // Обработчик нажатия кнопки "Войти"
-    void onRegisterClicked(); // Обработчик нажатия кнопки "Регистрация"
+    void onLoginClicked();          // Обработчик нажатия кнопки "Войти"
+    void onRegisterClicked();       // Обработчик нажатия кнопки "Регистрация"
 
 private:
     QLineEdit* usernameEdit;
@@ -28,14 +30,16 @@ private:
     QPushButton* registerButton;
     QPushButton* cancelButton;
     QLabel* statusLabel;
-    QString role; // Хранит роль: admin, analyst, guest
+    QString role;                   // Хранит роль: admin, analyst, guest
+    QString currentUser;            // Хранит имя текущего пользователя
 
     // Данные пользователей
-    QMap<QString, QString> users;     // логин -> роль
-    QMap<QString, QString> passwords; // логин -> пароль
+    QMap<QString, QString> users;       // логин -> роль
+    QMap<QString, QString> passwords;   // логин -> пароль
+    QMap<QString, QString> userThemes;  // логин -> тема (dark/light)
 
     // Работа с файлом users.json
-    void loadUsersFromFile();   // Загружает пользователей из JSON
-    void saveUsersToFile();     // Сохраняет пользователей в JSON
-    void createDefaultUsersFile(); // Создаёт файл с пользователями по умолчанию
+    void loadUsersFromFile();       // Загружает пользователей из JSON
+    void saveUsersToFile();         // Сохраняет пользователей в JSON
+    void createDefaultUsersFile();  // Создаёт файл с пользователями по умолчанию
 };

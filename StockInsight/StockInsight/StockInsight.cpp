@@ -48,7 +48,7 @@ StockInsight::StockInsight(QWidget* parent)
     QPushButton* sortBtn = new QPushButton("📅 Сортировать по дням");
     refreshBtn = new QPushButton("🔄 Обновить данные");
 
-    QPushButton* themeBtn = new QPushButton("🌙 Тёмная");
+    themeBtn = new QPushButton("🌙 Тёмная");
     themeBtn->setToolTip("Переключить тему (светлая/тёмная)");
 
     searchEdit = new QLineEdit();
@@ -260,7 +260,7 @@ void StockInsight::setUserRole(const QString& role)
         saveBtn->setEnabled(true);
         exportBtn->setEnabled(true);
         clearBtn->setEnabled(false);
-        refreshBtn->setEnabled(false);   // ← аналитик НЕ может обновлять данные
+        refreshBtn->setEnabled(false);
     }
     else if (role == "guest") {
         // loadBtn->setEnabled(false);
@@ -459,7 +459,6 @@ void StockInsight::saveJSON()
         product["is_defisit"] = p.isDeficit;
         product["is_stale"] = p.isStale;
 
-        // monthlySales (если есть)
         QJsonArray salesArr;
         for (int s : p.monthlySales) {
             salesArr.append(s);
@@ -729,6 +728,77 @@ void StockInsight::loadChartsFromAnalytics()
     runPythonScript("temp_data.csv");
 }
 
+// УСТАНАВЛИВАЕТ ТЕМУ (dark/light)
+void StockInsight::setTheme(const QString& theme)
+{
+    if (theme == "light") {
+        isDarkTheme = false;
+        QFile styleFile("style_light.qss");
+        if (styleFile.open(QFile::ReadOnly)) {
+            QString style = styleFile.readAll();
+            this->setStyleSheet(style);
+            styleFile.close();
+        }
+        if (themeBtn) {
+            themeBtn->setText("☀️ Светлая");
+        }
+    }
+    else {
+        isDarkTheme = true;
+        QFile styleFile("style_dark.qss");
+        if (styleFile.open(QFile::ReadOnly)) {
+            QString style = styleFile.readAll();
+            this->setStyleSheet(style);
+            styleFile.close();
+        }
+        if (themeBtn) {
+            themeBtn->setText("🌙 Тёмная");
+        }
+    }
+}
+
+// УСТАНАВЛИВАЕТ ИМЯ ПОЛЬЗОВАТЕЛЯ
+void StockInsight::setUsername(const QString& username)
+{
+    currentUsername = username;
+}
+
+// СОХРАНЯЕТ ТЕМУ В users.json
+void StockInsight::saveThemeToFile(const QString& theme)
+{
+    if (currentUsername.isEmpty()) {
+        return;
+    }
+
+    QFile file("users.json");
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        return;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject root = doc.object();
+    QJsonArray usersArray = root["users"].toArray();
+
+    for (int i = 0; i < usersArray.size(); ++i) {
+        QJsonObject obj = usersArray[i].toObject();
+        if (obj["username"].toString() == currentUsername) {
+            obj["theme"] = theme;
+            usersArray[i] = obj;
+            break;
+        }
+    }
+
+    root["users"] = usersArray;
+
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.close();
+    }
+}
+
 // ПЕРЕКЛЮЧЕНИЕ ТЕМ (тёмная/светлая)
 void StockInsight::toggleTheme()
 {
@@ -743,10 +813,12 @@ void StockInsight::toggleTheme()
     }
 
     // Меняем текст кнопки
-    QPushButton* btn = qobject_cast<QPushButton*>(sender());
-    if (btn) {
-        btn->setText(isDarkTheme ? "🌙 Тёмная" : "☀️ Светлая");
+    if (themeBtn) {
+        themeBtn->setText(isDarkTheme ? "🌙 Тёмная" : "☀️ Светлая");
     }
+
+    // Сохраняем тему в users.json
+    saveThemeToFile(isDarkTheme ? "dark" : "light");
 
     // Если таблица НЕ была очищена и есть данные — обновляем цвета
     if (!isTableCleared && !currentProducts.isEmpty()) {

@@ -22,6 +22,8 @@ public:
 
     void setUserRole(const QString& role);              // Устанавливает роль и блокирует кнопки
     void setAnalytics(const Analytics& data, const QVector<Product>& products);  // Принимает данные от бэкенда
+    void setTheme(const QString& theme);                // Устанавливает тему (dark/light) и обновляет интерфейс
+    void setUsername(const QString& username);          // Устанавливает имя пользователя для сохранения темы
 
 private slots:
     void loadCSV();                         // Загрузка CSV (оставлена для совместимости, не используется)
@@ -45,11 +47,13 @@ private:
     QPushButton* clearBtn;                  // Очистка таблицы
     QPushButton* logoutBtn;                 // Выход из учётной записи
     QPushButton* refreshBtn;                // Обновление данных
+    QPushButton* themeBtn;                  // Кнопка переключения темы
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
 
     // --- Данные ---
     QString currentRole;                    // Текущая роль пользователя
+    QString currentUsername;                // Имя текущего пользователя для сохранения темы
     QString currentCsvPath;                 // Путь к последнему загруженному CSV (не используется)
     QVector<QString> rowColors;             // Сохраняет цвета строк для фильтрации
     bool isDarkTheme = true;                // Текущая тема: true — тёмная, false — светлая
@@ -67,4 +71,5 @@ private:
     void runPythonScript(const QString& csvPath);   // Запускает Python-скрипт для генерации графиков
     void loadChartsToTabs();                // Загружает готовые картинки графиков во вкладки
     void loadChartsFromAnalytics();         // Строит графики из данных Analytics
+    void saveThemeToFile(const QString& theme);     // Сохраняет тему пользователя в users.json
 };

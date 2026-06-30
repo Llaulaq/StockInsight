@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
         LoginDialog login;
         if (login.exec() == QDialog::Accepted) {
             QString role = login.getRole();
+            QString theme = login.getTheme();   // Получаем тему пользователя
+            QString username = login.getUsername(); // Получаем имя пользователя
 
             QString exePath = QCoreApplication::applicationDirPath();
             QString productsPath = exePath + "/products.csv";
@@ -38,7 +40,9 @@ int main(int argc, char* argv[])
 
             StockInsight w;
             w.setUserRole(role);
+            w.setUsername(username);        // Передаём имя пользователя для сохранения темы
             w.setAnalytics(analytics, products);
+            w.setTheme(theme);              // Устанавливаем тему пользователя
 
             // --- ПОКАЗЫВАЕМ ОКНО ---
             w.show();

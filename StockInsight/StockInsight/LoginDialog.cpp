@@ -58,6 +58,7 @@ void LoginDialog::onLoginClicked()
     // Проверяем по загруженным из файла данным
     if (users.contains(user) && passwords[user] == pass) {
         role = users[user];
+        currentUser = user;   // ← запоминаем пользователя
         accept();
     }
     else {
@@ -80,6 +81,7 @@ void LoginDialog::onRegisterClicked()
         // Добавляем нового пользователя
         users[username] = role;
         passwords[username] = password;
+        userThemes[username] = "dark";   // ← тема по умолчанию
         saveUsersToFile();
 
         QMessageBox::information(this, "Регистрация успешна",
@@ -95,12 +97,29 @@ QString LoginDialog::getRole() const
     return role;
 }
 
+// Возвращает тему текущего пользователя
+QString LoginDialog::getTheme() const
+{
+    if (userThemes.contains(currentUser)) {
+        return userThemes[currentUser];
+    }
+    return "dark";   // тема по умолчанию
+}
+
+// Возвращает имя текущего пользователя
+QString LoginDialog::getUsername() const
+{
+    return currentUser;
+}
+
+// РАБОТА С ФАЙЛОМ users.json
+
 // Загружает пользователей из JSON-файла
 void LoginDialog::loadUsersFromFile()
 {
     QFile file("users.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        createDefaultUsersFile(); // Если файла нет — создаём
+        createDefaultUsersFile();
         return;
     }
 
@@ -109,6 +128,7 @@ void LoginDialog::loadUsersFromFile()
 
     users.clear();
     passwords.clear();
+    userThemes.clear();
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject root = doc.object();
@@ -119,9 +139,15 @@ void LoginDialog::loadUsersFromFile()
         QString username = obj["username"].toString();
         QString password = obj["password"].toString();
         QString role = obj["role"].toString();
+        QString theme = obj["theme"].toString();
+
+        if (theme.isEmpty()) {
+            theme = "dark";
+        }
 
         users[username] = role;
         passwords[username] = password;
+        userThemes[username] = theme;
     }
 }
 
@@ -135,6 +161,7 @@ void LoginDialog::saveUsersToFile()
         obj["username"] = it.key();
         obj["password"] = passwords[it.key()];
         obj["role"] = it.value();
+        obj["theme"] = userThemes.value(it.key(), "dark");
         usersArray.append(obj);
     }
 
@@ -157,5 +184,10 @@ void LoginDialog::createDefaultUsersFile()
     passwords["analyst"] = "5678";
     users["guest"] = "guest";
     passwords["guest"] = "0000";
+
+    userThemes["admin"] = "dark";
+    userThemes["analyst"] = "dark";
+    userThemes["guest"] = "dark";
+
     saveUsersToFile();
 }
