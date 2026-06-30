@@ -43,6 +43,7 @@ private slots:
     void exportJPEG();                      // Экспорт текущего графика в JPEG
     void exportAllCharts();                 // Экспорт всех графиков в папку
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
+    void filterByCategory(int index);       // Фильтр таблицы по категории
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
     void toggleTheme();                     // Переключение тёмной/светлой темы
     void onChartClicked();                  // Обработчик клика по графику (открытие в отдельном окне)
@@ -62,6 +63,7 @@ private:
     QPushButton* themeBtn;                  // Кнопка переключения темы
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
+    QComboBox* categoryFilter;              // Выпадающий список для фильтра по категории
 
     // --- Виджеты статистики ---
     QLabel* totalProductsLabel;             // Всего товаров

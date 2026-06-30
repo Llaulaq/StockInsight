@@ -22,6 +22,7 @@
 #include <QMouseEvent>
 #include <QDialog>
 #include <QHeaderView>
+#include <QSet>
 
 #include "models/Product.h"
 #include "models/Analytics.h"
@@ -83,6 +84,12 @@ StockInsight::StockInsight(QWidget* parent)
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
 
+    // --- Фильтр по категории ---
+    categoryFilter = new QComboBox();
+    categoryFilter->addItem("Все категории");
+    categoryFilter->setMaximumWidth(150);
+    categoryFilter->setToolTip("Фильтр по категории");
+
     // --- Фильтр по цвету (выпадающий список) ---
     colorFilter = new QComboBox();
     colorFilter->addItems({ "Все", "🔴 Дефицит", "🟠 Залежалые", "🟢 Много товара", "⚪ Обычные" });
@@ -97,6 +104,7 @@ StockInsight::StockInsight(QWidget* parent)
     testBtn->setToolTip("Сгенерировать и показать графики");
     refreshBtn->setToolTip("Обновить данные из CSV-файлов");
     searchEdit->setToolTip("Введите текст для поиска по товарам");
+    categoryFilter->setToolTip("Фильтровать по категории");
     colorFilter->setToolTip("Фильтровать строки по цвету");
 
     buttonLayout->addWidget(saveBtn);
@@ -104,6 +112,7 @@ StockInsight::StockInsight(QWidget* parent)
     buttonLayout->addWidget(exportAllBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(testBtn);
+    buttonLayout->addWidget(categoryFilter);
     buttonLayout->addWidget(colorFilter);
     buttonLayout->addWidget(refreshBtn);
     buttonLayout->addStretch();
@@ -195,6 +204,7 @@ StockInsight::StockInsight(QWidget* parent)
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
     connect(exportAllBtn, &QPushButton::clicked, this, &StockInsight::exportAllCharts);
+    connect(categoryFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByCategory);
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
     connect(themeBtn, &QPushButton::clicked, this, &StockInsight::toggleTheme);
@@ -448,6 +458,23 @@ void StockInsight::showCharts()
         return;
     }
     runPythonScript(currentCsvPath);
+}
+
+// ФИЛЬТР ПО КАТЕГОРИИ
+void StockInsight::filterByCategory(int index)
+{
+    QString category = categoryFilter->currentText();
+    
+    for (int row = 0; row < table->rowCount(); ++row) {
+        QTableWidgetItem* item = table->item(row, 1);  // Колонка "Категория"
+        bool show = true;
+        
+        if (category != "Все категории" && item) {
+            show = (item->text() == category);
+        }
+        
+        table->setRowHidden(row, !show);
+    }
 }
 
 // ФИЛЬТР ПО ЦВЕТУ
@@ -734,6 +761,21 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
             rowColors.append("normal");
         }
     }
+
+    // Обновляем список категорий для фильтра
+    categoryFilter->blockSignals(true);
+    categoryFilter->clear();
+    categoryFilter->addItem("Все категории");
+
+    QSet<QString> categories;
+    for (const Product& p : products) {
+        categories.insert(p.category);
+    }
+
+    for (const QString& cat : categories) {
+        categoryFilter->addItem(cat);
+    }
+    categoryFilter->blockSignals(false);
 
     // -- Применяем цвета --
     // Определяем цвет для обычных товаров в зависимости от темы
