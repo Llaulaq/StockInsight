@@ -208,6 +208,8 @@ StockInsight::StockInsight(QWidget* parent)
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
     connect(themeBtn, &QPushButton::clicked, this, &StockInsight::toggleTheme);
+    connect(categoryFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByCategory);
+    connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
 
     // Обновляем статистику при запуске
     updateStatistics();
@@ -463,42 +465,50 @@ void StockInsight::showCharts()
 // ФИЛЬТР ПО КАТЕГОРИИ
 void StockInsight::filterByCategory(int index)
 {
-    QString category = categoryFilter->currentText();
-    
-    for (int row = 0; row < table->rowCount(); ++row) {
-        QTableWidgetItem* item = table->item(row, 1);  // Колонка "Категория"
-        bool show = true;
-        
-        if (category != "Все категории" && item) {
-            show = (item->text() == category);
-        }
-        
-        table->setRowHidden(row, !show);
-    }
+    applyFilters();
 }
 
 // ФИЛЬТР ПО ЦВЕТУ
 void StockInsight::filterByColor(int index)
 {
-    QString filterText = colorFilter->currentText();
+    applyFilters();
+}
+
+// ПРИМЕНЕНИЕ ВСЕХ ФИЛЬТРОВ
+void StockInsight::applyFilters()
+{
+    if (table->rowCount() == 0) {
+        return;
+    }
+
+    QString category = categoryFilter->currentText();
+    QString color = colorFilter->currentText();
 
     for (int row = 0; row < table->rowCount(); ++row) {
         bool show = true;
 
-        if (filterText == "⚠️ Дефицит") {
-            show = (rowColors[row] == "deficit");
+        // Фильтр по категории
+        if (category != "Все категории") {
+            QTableWidgetItem* item = table->item(row, 1);
+            if (item) {
+                show = (item->text() == category);
+            }
         }
-        else if (filterText == "⏳ Залежалые") {
-            show = (rowColors[row] == "stale");
-        }
-        else if (filterText == "📦 Избыток") {
-            show = (rowColors[row] == "green");
-        }
-        else if (filterText == "✅ Норма") {
-            show = (rowColors[row] == "normal");
-        }
-        else {
-            show = true;
+
+        // Фильтр по цвету
+        if (show && color != "Все статусы" && color != "Показать все" && color != "Все товары") {
+            if (color == "⚠️ Дефицит") {
+                show = (rowColors[row] == "deficit");
+            }
+            else if (color == "⏳ Залежалые") {
+                show = (rowColors[row] == "stale");
+            }
+            else if (color == "📦 Избыток") {
+                show = (rowColors[row] == "green");
+            }
+            else if (color == "✅ Норма") {
+                show = (rowColors[row] == "normal");
+            }
         }
 
         table->setRowHidden(row, !show);
