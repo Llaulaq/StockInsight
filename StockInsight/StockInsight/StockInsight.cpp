@@ -421,7 +421,6 @@ void StockInsight::loadChartsToTabs()
         // --- КНОПКА СОХРАНЕНИЯ (ПЕРЕД ГРАФИКОМ) ---
         QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
         saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
-        saveChartBtn->setStyleSheet("font-weight: bold; padding: 6px 16px;");
 
         // Добавляем кнопку в layout
         chartLayouts[i]->addWidget(saveChartBtn, 0, Qt::AlignCenter);
@@ -1076,6 +1075,7 @@ void StockInsight::onChartClicked()
 
     QVBoxLayout* dialogLayout = new QVBoxLayout(dialog);
 
+    // --- УВЕЛИЧЕННЫЙ ГРАФИК ---
     QLabel* bigLabel = new QLabel();
     QPixmap scaled = pixmap.scaled(880, 680, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     bigLabel->setPixmap(scaled);
@@ -1084,12 +1084,24 @@ void StockInsight::onChartClicked()
 
     dialogLayout->addWidget(bigLabel);
 
+    // --- КНОПКА СОХРАНЕНИЯ (под графиком) ---
+    QPushButton* saveBigChartBtn = new QPushButton("💾 Сохранить JPEG");
+    saveBigChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
+
+    // Подключаем сигнал (сохраняем текущий график)
+    connect(saveBigChartBtn, &QPushButton::clicked, this, [this, currentTab]() {
+        exportCurrentChart(currentTab);
+        });
+
+    // --- КНОПКА ЗАКРЫТИЯ ---
     QPushButton* closeBtn = new QPushButton("✖ Закрыть");
     closeBtn->setFixedWidth(120);
+
     QHBoxLayout* btnLayout = new QHBoxLayout();
+    btnLayout->addWidget(saveBigChartBtn);
     btnLayout->addStretch();
     btnLayout->addWidget(closeBtn);
-    btnLayout->addStretch();
+
     dialogLayout->addLayout(btnLayout);
 
     connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::accept);
