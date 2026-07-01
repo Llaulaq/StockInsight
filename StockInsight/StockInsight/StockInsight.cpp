@@ -331,12 +331,27 @@ void StockInsight::clearTable()
         return;
     }
 
+    // Удаляем графики, если они показаны
+    if (chartsVisible) {
+        for (int i = 0; i < chartLayouts.size(); ++i) {
+            QLayout* layout = chartLayouts[i];
+            QLayoutItem* item;
+            while ((item = layout->takeAt(0)) != nullptr) {
+                delete item->widget();
+                delete item;
+            }
+        }
+        chartsVisible = false;
+        showChartsBtn->setText("📈 Показать графики");
+        showChartsBtn->setToolTip("Сгенерировать и показать графики");
+    }
+
     table->setRowCount(0);
     rowColors.clear();
     isTableCleared = true;   // ← запоминаем, что таблица очищена
     updateStatistics();      // Обновляем статистику
-    updateButtonsState();
-    QMessageBox::information(this, "Готово", "Таблица очищена!");
+    updateButtonsState();    // Блокируем кнопки
+    QMessageBox::information(this, "Готово", "Таблица и графики очищены!");
 }
 
 // ПОИСК ПО ТАБЛИЦЕ
@@ -893,8 +908,8 @@ void StockInsight::refreshData()
     setAnalytics(analytics, products);
     table->resizeColumnsToContents();
 
-    // Если есть данные — обновляем графики
-    if (!products.isEmpty()) {
+    // Если графики были показаны — пересоздаём их
+    if (chartsVisible) {
         loadChartsFromAnalytics();
     }
 
@@ -1181,30 +1196,12 @@ void StockInsight::updateButtonsState()
     bool canExport = hasData && (currentRole == "admin" || currentRole == "analyst");
     exportAllBtn->setEnabled(canExport);
 
-    // Кнопка показа/удаления графиков
+    // Кнопка показа/удаления графиков — активна только если есть данные
     showChartsBtn->setEnabled(hasData);
 
     // Кнопки, зависящие только от роли
     clearBtn->setEnabled(currentRole == "admin");
     refreshBtn->setEnabled(currentRole == "admin");
-}
-
-// ПОЛУЧЕНИЕ ТОЛЬКО ВИДИМЫХ ТОВАРОВ
-QVector<Product> StockInsight::getVisibleProducts() const
-{
-    QVector<Product> visibleProducts;
-
-    if (currentProducts.isEmpty() || isTableCleared) {
-        return visibleProducts;
-    }
-
-    for (int row = 0; row < table->rowCount(); ++row) {
-        if (!table->isRowHidden(row) && row < currentProducts.size()) {
-            visibleProducts.append(currentProducts[row]);
-        }
-    }
-
-    return visibleProducts;
 }
 
 // СОРТИРОВКА ПО КЛИКУ НА ЗАГОЛОВОК
@@ -1222,4 +1219,25 @@ void StockInsight::onHeaderClicked(int column)
     }
 
     table->sortItems(column, order);
+}
+
+// ПОЛУЧЕНИЕ ТОЛЬКО ВИДИМЫХ ТОВАРОВ
+QVector<Product> StockInsight::getVisibleProducts() const
+{
+    QVector<Product> visibleProducts;
+
+    // Если данных нет или таблица очищена — возвращаем пустой вектор
+    if (currentProducts.isEmpty() || isTableCleared) {
+        return visibleProducts;
+    }
+
+    // Проходим по всем строкам таблицы
+    for (int row = 0; row < table->rowCount(); ++row) {
+        // Если строка не скрыта фильтром/поиском — добавляем товар
+        if (!table->isRowHidden(row) && row < currentProducts.size()) {
+            visibleProducts.append(currentProducts[row]);
+        }
+    }
+
+    return visibleProducts;
 }
