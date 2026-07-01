@@ -24,6 +24,7 @@
 #include <QTabWidget>
 #include <QTextStream>
 #include <QVBoxLayout>
+#include <QRegularExpression>
 
 #include "models/Analytics.h"
 #include "models/Product.h"
@@ -78,9 +79,6 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель ---
     QHBoxLayout* buttonLayout = new QHBoxLayout();
 
-    exportBtn = new QPushButton("🖼️ Экспорт JPEG");
-    exportBtn->setToolTip("Сохранить текущий график в JPEG-файл");
-
     exportAllBtn = new QPushButton("📦 Экспорт всех");
     exportAllBtn->setToolTip("Сохранить все графики в выбранную папку");
 
@@ -115,9 +113,6 @@ StockInsight::StockInsight(QWidget* parent)
     colorFilter->setMaximumWidth(150);
     colorFilter->setToolTip("Фильтр по состоянию товара");
 
-    // --- Подсказки для кнопок ---
-
-    buttonLayout->addWidget(exportBtn);
     buttonLayout->addWidget(exportAllBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(showChartsBtn);
@@ -137,7 +132,7 @@ StockInsight::StockInsight(QWidget* parent)
     QLabel* tableLabel = new QLabel("📋 Список товаров");
     saveBtn = new QPushButton("💾 Сохранить JSON");
     saveBtn->setToolTip("Сохранить данные из текущей таблицы в JSON-файл (с учётом фильтров)");
-    saveBtn->setEnabled(false);  // Изначально неактивна
+    saveBtn->setEnabled(false);
 
     tableHeaderLayout->addWidget(tableLabel);
     tableHeaderLayout->addStretch();
@@ -221,7 +216,6 @@ StockInsight::StockInsight(QWidget* parent)
     connect(logoutBtn, &QPushButton::clicked, this, &StockInsight::logout);
     connect(showChartsBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
-    connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
     connect(exportAllBtn, &QPushButton::clicked, this, &StockInsight::exportAllCharts);
     connect(categoryFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByCategory);
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
@@ -393,7 +387,7 @@ void StockInsight::runPythonScript(const QString& csvPath)
     }
 }
 
-// ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ
+// ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ С КНОПКОЙ СОХРАНЕНИЯ
 void StockInsight::loadChartsToTabs()
 {
     // Очищаем старые виджеты во вкладках
@@ -416,19 +410,32 @@ void StockInsight::loadChartsToTabs()
     for (int i = 0; i < imageFiles.size() && i < chartLayouts.size(); ++i) {
         QString imagePath = "charts/" + imageFiles[i];
         QPixmap pixmap(imagePath);
+
+        // --- КНОПКА СОХРАНЕНИЯ (ПЕРЕД ГРАФИКОМ) ---
+        QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
+        saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
+        saveChartBtn->setStyleSheet("font-weight: bold; padding: 6px 16px;");
+
+        // Добавляем кнопку в layout
+        chartLayouts[i]->addWidget(saveChartBtn, 0, Qt::AlignCenter);
+
+        // Подключаем сигнал
+        connect(saveChartBtn, &QPushButton::clicked, this, [this, i]() {
+            exportCurrentChart(i);
+            });
+
+        // --- ГРАФИК ---
         QLabel* label = new QLabel();
         if (!pixmap.isNull()) {
             QWidget* parentWidget = chartLayouts[i]->parentWidget();
             int w = parentWidget->width() - 20;
             int h = parentWidget->height() - 20;
 
-            // --- Минимальный размер, чтобы график не был слишком маленьким ---
             if (w < 700) w = 700;
             if (h < 500) h = 500;
 
             label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             label->setAlignment(Qt::AlignCenter);
-            // Устанавливаем фильтр событий для обработки клика
             label->installEventFilter(this);
         }
         else {
@@ -558,7 +565,7 @@ void StockInsight::saveJSON()
     QJsonObject summary;
     summary["total_potential_profit"] = visibleAnalytics.totalPotentialProfit;
     summary["frozen_money"] = visibleAnalytics.frozenMoney;
-    summary["defiсit_risk_count"] = visibleAnalytics.deficitRiskCount;
+    summary["deficit_risk_count"] = visibleAnalytics.deficitRiskCount;
     summary["stale_count"] = visibleAnalytics.staleCount;
 
     // --- Данные для графиков ---
@@ -603,28 +610,26 @@ void StockInsight::saveJSON()
     }
 }
 
-// ЭКСПОРТ ТЕКУЩЕГО ГРАФИКА В JPEG
-void StockInsight::exportJPEG()
+// ЭКСПОРТ ТЕКУЩЕГО ГРАФИКА
+void StockInsight::exportCurrentChart(int index)
 {
-    // Проверяем, есть ли данные
     if (currentProducts.isEmpty() || isTableCleared) {
         QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта!");
         return;
     }
 
-    int currentTab = tabs->currentIndex();
-    if (currentTab < 0 || currentTab >= chartLayouts.size()) {
-        QMessageBox::warning(this, "Ошибка", "Нет активной вкладки с графиком.");
+    if (index < 0 || index >= chartLayouts.size()) {
         return;
     }
 
-    QLayout* layout = chartLayouts[currentTab];
-    if (!layout || layout->count() == 0) {
+    QLayout* layout = chartLayouts[index];
+    if (!layout || layout->count() < 2) {  // 0 - кнопка, 1 - график
         QMessageBox::warning(this, "Ошибка", "В этой вкладке нет графика.");
         return;
     }
 
-    QWidget* widget = layout->itemAt(0)->widget();
+    // Ищем QLabel с графиком (второй виджет в layout)
+    QWidget* widget = layout->itemAt(1)->widget();
     QLabel* label = qobject_cast<QLabel*>(widget);
     if (!label) {
         QMessageBox::warning(this, "Ошибка", "Не удалось получить график.");
@@ -637,7 +642,11 @@ void StockInsight::exportJPEG()
         return;
     }
 
-    QString defaultName = QString("chart_%1.jpeg").arg(currentTab + 1);
+    QString tabName = tabs->tabText(index);
+    QString defaultName = QString("chart_%1_%2.jpeg")
+        .arg(index + 1)
+        .arg(tabName.remove(QRegularExpression("[📊💰📈⚠️]")).trimmed());
+
     QString filePath = QFileDialog::getSaveFileName(this, "Сохранить JPEG", defaultName, "JPEG файлы (*.jpeg)");
     if (filePath.isEmpty()) return;
 
@@ -1036,11 +1045,12 @@ void StockInsight::onChartClicked()
     }
 
     QLayout* layout = chartLayouts[currentTab];
-    if (!layout || layout->count() == 0) {
+    if (!layout || layout->count() < 2) {  // 0 - кнопка, 1 - график
         return;
     }
 
-    QWidget* widget = layout->itemAt(0)->widget();
+    // Ищем QLabel с графиком (второй виджет в layout)
+    QWidget* widget = layout->itemAt(1)->widget();
     QLabel* label = qobject_cast<QLabel*>(widget);
     if (!label) {
         return;
@@ -1060,7 +1070,6 @@ void StockInsight::onChartClicked()
     QVBoxLayout* dialogLayout = new QVBoxLayout(dialog);
 
     QLabel* bigLabel = new QLabel();
-    // Масштабируем картинку под размер окна с сохранением пропорций
     QPixmap scaled = pixmap.scaled(880, 680, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     bigLabel->setPixmap(scaled);
     bigLabel->setAlignment(Qt::AlignCenter);
@@ -1068,7 +1077,6 @@ void StockInsight::onChartClicked()
 
     dialogLayout->addWidget(bigLabel);
 
-    // Кнопка закрытия
     QPushButton* closeBtn = new QPushButton("✖ Закрыть");
     closeBtn->setFixedWidth(120);
     QHBoxLayout* btnLayout = new QHBoxLayout();
@@ -1078,8 +1086,6 @@ void StockInsight::onChartClicked()
     dialogLayout->addLayout(btnLayout);
 
     connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::accept);
-
-    // Закрытие по Escape
     connect(dialog, &QDialog::rejected, dialog, &QDialog::accept);
 
     dialog->exec();
@@ -1140,7 +1146,6 @@ void StockInsight::updateButtonsState()
 
     // Кнопки экспорта графиков
     bool canExport = hasData && (currentRole == "admin" || currentRole == "analyst");
-    exportBtn->setEnabled(canExport);
     exportAllBtn->setEnabled(canExport);
 
     // Кнопка показа графиков
@@ -1156,14 +1161,11 @@ QVector<Product> StockInsight::getVisibleProducts() const
 {
     QVector<Product> visibleProducts;
 
-    // Если данных нет или таблица очищена — возвращаем пустой вектор
     if (currentProducts.isEmpty() || isTableCleared) {
         return visibleProducts;
     }
 
-    // Проходим по всем строкам таблицы
     for (int row = 0; row < table->rowCount(); ++row) {
-        // Если строка не скрыта фильтром/поиском — добавляем товар
         if (!table->isRowHidden(row) && row < currentProducts.size()) {
             visibleProducts.append(currentProducts[row]);
         }

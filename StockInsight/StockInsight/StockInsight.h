@@ -41,7 +41,6 @@ private slots:
     void logout();                          // Выход из учётной записи
     void showCharts();                      // Показать графики
     void saveJSON();                        // Сохранение данных в JSON (только видимые строки)
-    void exportJPEG();                      // Экспорт текущего графика в JPEG
     void exportAllCharts();                 // Экспорт всех графиков в папку
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
     void toggleTheme();                     // Переключение тёмной/светлой темы
@@ -50,13 +49,13 @@ private slots:
     void onHeaderClicked(int column);       // Сортировка по клику на заголовок
     void filterByCategory(int index);       // Фильтр таблицы по категории
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
+    void exportCurrentChart(int index);     // Экспорт текущего графика из вкладки
 
 private:
     // --- Виджеты интерфейса ---
     QTableWidget* table;                    // Таблица для отображения товаров
     QPushButton* loadBtn;                   // Кнопка загрузки CSV (не используется)
     QPushButton* saveBtn;                   // Сохранение JSON (над таблицей)
-    QPushButton* exportBtn;                 // Экспорт JPEG
     QPushButton* exportAllBtn;              // Экспорт всех графиков
     QPushButton* clearBtn;                  // Очистка таблицы
     QPushButton* logoutBtn;                 // Выход из учётной записи
