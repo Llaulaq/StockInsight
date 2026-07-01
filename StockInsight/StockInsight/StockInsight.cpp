@@ -542,7 +542,7 @@ void StockInsight::saveJSON()
         product["sale_price"] = p.salePrice;
         product["days_in_stock"] = p.daysInStock;
         product["total_profit"] = p.totalProfit;
-        product["is_defisit"] = p.isDeficit;
+        product["is_deficit"] = p.isDeficit;
         product["is_stale"] = p.isStale;
 
         QJsonArray salesArr;
@@ -558,7 +558,7 @@ void StockInsight::saveJSON()
     QJsonObject summary;
     summary["total_potential_profit"] = visibleAnalytics.totalPotentialProfit;
     summary["frozen_money"] = visibleAnalytics.frozenMoney;
-    summary["defisit_risk_count"] = visibleAnalytics.deficitRiskCount;
+    summary["defiсit_risk_count"] = visibleAnalytics.deficitRiskCount;
     summary["stale_count"] = visibleAnalytics.staleCount;
 
     // --- Данные для графиков ---
