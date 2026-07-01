@@ -50,6 +50,7 @@ private slots:
     void filterByCategory(int index);       // Фильтр таблицы по категории
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
     void exportCurrentChart(int index);     // Экспорт текущего графика из вкладки
+    void resetFilters();                    // Сброс всех фильтров
 
 private:
     // --- Виджеты интерфейса ---
@@ -62,6 +63,7 @@ private:
     QPushButton* refreshBtn;                // Обновление данных
     QPushButton* themeBtn;                  // Кнопка переключения темы
     QPushButton* showChartsBtn;             // Кнопка "Показать графики" / "Удалить графики"
+    QPushButton* resetFiltersBtn;           // Кнопка сброса фильтров
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
     QComboBox* categoryFilter;              // Выпадающий список для фильтра по категории

@@ -18,13 +18,13 @@
 #include <QPixmap>
 #include <QProcess>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSet>
 #include <QSplitter>
 #include <QTableWidget>
 #include <QTabWidget>
 #include <QTextStream>
 #include <QVBoxLayout>
-#include <QRegularExpression>
 
 #include "models/Analytics.h"
 #include "models/Product.h"
@@ -79,7 +79,11 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель ---
     QHBoxLayout* buttonLayout = new QHBoxLayout();
 
-    exportAllBtn = new QPushButton("📦 Экспорт всех");
+    resetFiltersBtn = new QPushButton("🔄 Сбросить фильтры");
+    resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
+    resetFiltersBtn->setMaximumWidth(150);
+
+    exportAllBtn = new QPushButton("📦 Экспорт всех графиков");
     exportAllBtn->setToolTip("Сохранить все графики в выбранную папку");
 
     clearBtn = new QPushButton("🗑️ Очистить");
@@ -113,6 +117,7 @@ StockInsight::StockInsight(QWidget* parent)
     colorFilter->setMaximumWidth(150);
     colorFilter->setToolTip("Фильтр по состоянию товара");
 
+    buttonLayout->addWidget(resetFiltersBtn);
     buttonLayout->addWidget(exportAllBtn);
     buttonLayout->addWidget(clearBtn);
     buttonLayout->addWidget(showChartsBtn);
@@ -217,6 +222,7 @@ StockInsight::StockInsight(QWidget* parent)
     connect(showChartsBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportAllBtn, &QPushButton::clicked, this, &StockInsight::exportAllCharts);
+    connect(resetFiltersBtn, &QPushButton::clicked, this, &StockInsight::resetFilters);
     connect(categoryFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByCategory);
     connect(colorFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &StockInsight::filterByColor);
     connect(refreshBtn, &QPushButton::clicked, this, &StockInsight::refreshData);
@@ -511,6 +517,17 @@ void StockInsight::filterByCategory(int index)
 // ФИЛЬТР ПО ЦВЕТУ
 void StockInsight::filterByColor(int index)
 {
+    applyFilters();
+    updateButtonsState();
+}
+
+// СБРОС ВСЕХ ФИЛЬТРОВ
+void StockInsight::resetFilters()
+{
+    categoryFilter->setCurrentIndex(0);
+    colorFilter->setCurrentIndex(0);
+    searchEdit->clear();
+
     applyFilters();
     updateButtonsState();
 }
@@ -1199,9 +1216,30 @@ void StockInsight::updateButtonsState()
     // Кнопка показа/удаления графиков — активна только если есть данные
     showChartsBtn->setEnabled(hasData);
 
+    // Кнопка сброса фильтров — активна всегда
+    resetFiltersBtn->setEnabled(true);
+
     // Кнопки, зависящие только от роли
     clearBtn->setEnabled(currentRole == "admin");
     refreshBtn->setEnabled(currentRole == "admin");
+}
+
+// ПОЛУЧЕНИЕ ТОЛЬКО ВИДИМЫХ ТОВАРОВ
+QVector<Product> StockInsight::getVisibleProducts() const
+{
+    QVector<Product> visibleProducts;
+
+    if (currentProducts.isEmpty() || isTableCleared) {
+        return visibleProducts;
+    }
+
+    for (int row = 0; row < table->rowCount(); ++row) {
+        if (!table->isRowHidden(row) && row < currentProducts.size()) {
+            visibleProducts.append(currentProducts[row]);
+        }
+    }
+
+    return visibleProducts;
 }
 
 // СОРТИРОВКА ПО КЛИКУ НА ЗАГОЛОВОК
@@ -1219,25 +1257,4 @@ void StockInsight::onHeaderClicked(int column)
     }
 
     table->sortItems(column, order);
-}
-
-// ПОЛУЧЕНИЕ ТОЛЬКО ВИДИМЫХ ТОВАРОВ
-QVector<Product> StockInsight::getVisibleProducts() const
-{
-    QVector<Product> visibleProducts;
-
-    // Если данных нет или таблица очищена — возвращаем пустой вектор
-    if (currentProducts.isEmpty() || isTableCleared) {
-        return visibleProducts;
-    }
-
-    // Проходим по всем строкам таблицы
-    for (int row = 0; row < table->rowCount(); ++row) {
-        // Если строка не скрыта фильтром/поиском — добавляем товар
-        if (!table->isRowHidden(row) && row < currentProducts.size()) {
-            visibleProducts.append(currentProducts[row]);
-        }
-    }
-
-    return visibleProducts;
 }
