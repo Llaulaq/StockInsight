@@ -370,7 +370,14 @@ void StockInsight::onSearchTextChanged(const QString& text)
 // ЗАПУСК PYTHON-СКРИПТА
 void StockInsight::runPythonScript(const QString& csvPath)
 {
+    // Пытаемся найти python.exe рядом с программой
     QString pythonExe = QCoreApplication::applicationDirPath() + "/python.exe";
+
+    // Если рядом нет — используем системный python
+    if (!QFile::exists(pythonExe)) {
+        pythonExe = "python";
+    }
+
     QString scriptPath = QCoreApplication::applicationDirPath() + "/generate_charts.py";
 
     QProcess process;
