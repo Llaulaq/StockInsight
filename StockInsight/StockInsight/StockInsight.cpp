@@ -44,10 +44,19 @@ StockInsight::StockInsight(QWidget* parent)
     QHBoxLayout* statsLayout = new QHBoxLayout();
 
     totalProductsLabel = new QLabel("📦 Всего: 0");
+    totalProductsLabel->setToolTip("Общее количество товаров на складе");
+
     totalProfitLabel = new QLabel("💰 Прибыль: 0 ₽");
+    totalProfitLabel->setToolTip("Суммарная потенциальная прибыль от продажи всех товаров");
+
     frozenMoneyLabel = new QLabel("❄️ Заморожено: 0 ₽");
+    frozenMoneyLabel->setToolTip("Средства, замороженные в залежалых товарах");
+
     deficitCountLabel = new QLabel("🔴 Дефицит: 0");
+    deficitCountLabel->setToolTip("Количество товаров с риском дефицита");
+
     staleCountLabel = new QLabel("🟠 Залежалые: 0");
+    staleCountLabel->setToolTip("Количество залежалых товаров (более 90 дней на складе)");
 
     // Стили для статистики
     QString statsStyle = "font-size: 13px; font-weight: bold; padding: 4px 10px;";
@@ -69,21 +78,30 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель ---
     QHBoxLayout* buttonLayout = new QHBoxLayout();
 
-    // loadBtn = new QPushButton("📂 Загрузить CSV");  // ← УДАЛЕНО (больше не нужно)
-    saveBtn = new QPushButton("💾 Сохранить JSON");
     exportBtn = new QPushButton("🖼️ Экспорт JPEG");
-    exportAllBtn = new QPushButton("📦 Экспорт всех");
-    clearBtn = new QPushButton("🗑️ Очистить");
-    logoutBtn = new QPushButton("🚪 Выйти");
+    exportBtn->setToolTip("Сохранить текущий график в JPEG-файл");
 
-    QPushButton* testBtn = new QPushButton("📈 Показать графики");
+    exportAllBtn = new QPushButton("📦 Экспорт всех");
+    exportAllBtn->setToolTip("Сохранить все графики в выбранную папку");
+
+    clearBtn = new QPushButton("🗑️ Очистить");
+    clearBtn->setToolTip("Очистить таблицу (только для администратора)");
+
+    logoutBtn = new QPushButton("🚪 Выйти");
+    logoutBtn->setToolTip("Выйти из учётной записи");
+
+    showChartsBtn = new QPushButton("📈 Показать графики");
+    showChartsBtn->setToolTip("Сгенерировать и показать графики");
+
     refreshBtn = new QPushButton("🔄 Обновить данные");
+    refreshBtn->setToolTip("Обновить данные из CSV-файлов (только для администратора)");
 
     themeBtn = new QPushButton("🌙 Тёмная");
     themeBtn->setToolTip("Переключить тему (светлая/тёмная)");
 
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
+    searchEdit->setToolTip("Введите текст для поиска по названию товара");
 
     // --- Фильтр по категории ---
     categoryFilter = new QComboBox();
@@ -91,28 +109,18 @@ StockInsight::StockInsight(QWidget* parent)
     categoryFilter->setMaximumWidth(150);
     categoryFilter->setToolTip("Фильтр по категории");
 
-    // --- Фильтр по цвету (выпадающий список) ---
+    // --- Фильтр по цвету ---
     colorFilter = new QComboBox();
     colorFilter->addItems({ "Все товары", "⚠️ Дефицит", "⏳ Залежалые", "📦 Избыток", "✅ Норма" });
     colorFilter->setMaximumWidth(150);
+    colorFilter->setToolTip("Фильтр по состоянию товара");
 
-    // --- ПОДСКАЗКИ ДЛЯ КНОПОК ---
-    saveBtn->setToolTip("Сохранить данные в JSON-файл");
-    exportBtn->setToolTip("Экспортировать текущий график в JPEG");
-    exportAllBtn->setToolTip("Экспортировать все графики в папку");
-    clearBtn->setToolTip("Очистить таблицу (только для администратора)");
-    logoutBtn->setToolTip("Выйти из учётной записи");
-    testBtn->setToolTip("Сгенерировать и показать графики");
-    refreshBtn->setToolTip("Обновить данные из CSV-файлов");
-    searchEdit->setToolTip("Введите текст для поиска по товарам");
-    categoryFilter->setToolTip("Фильтровать по категории");
-    colorFilter->setToolTip("Фильтровать строки по цвету");
+    // --- Подсказки для кнопок ---
 
-    buttonLayout->addWidget(saveBtn);
     buttonLayout->addWidget(exportBtn);
     buttonLayout->addWidget(exportAllBtn);
     buttonLayout->addWidget(clearBtn);
-    buttonLayout->addWidget(testBtn);
+    buttonLayout->addWidget(showChartsBtn);
     buttonLayout->addWidget(categoryFilter);
     buttonLayout->addWidget(colorFilter);
     buttonLayout->addWidget(refreshBtn);
@@ -123,10 +131,21 @@ StockInsight::StockInsight(QWidget* parent)
 
     mainLayout->addLayout(buttonLayout);
 
-    // --- Таблица ---
-    QLabel* tableLabel = new QLabel("📋 Список товаров");
-    mainLayout->addWidget(tableLabel);
+    // --- Заголовок таблицы с кнопкой сохранения ---
+    QHBoxLayout* tableHeaderLayout = new QHBoxLayout();
 
+    QLabel* tableLabel = new QLabel("📋 Список товаров");
+    saveBtn = new QPushButton("💾 Сохранить JSON");
+    saveBtn->setToolTip("Сохранить данные из текущей таблицы в JSON-файл (с учётом фильтров)");
+    saveBtn->setEnabled(false);  // Изначально неактивна
+
+    tableHeaderLayout->addWidget(tableLabel);
+    tableHeaderLayout->addStretch();
+    tableHeaderLayout->addWidget(saveBtn);
+
+    mainLayout->addLayout(tableHeaderLayout);
+
+    // --- Таблица ---
     table = new QTableWidget(0, 7);
     QStringList headers = { "Товар", "Категория", "Кол-во", "Цена зак.", "Цена прод.", "Дней", "Прибыль" };
     table->setHorizontalHeaderLabels(headers);
@@ -197,11 +216,10 @@ StockInsight::StockInsight(QWidget* parent)
     }
 
     // --- Подключение сигналов к слотам ---
-    // connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);  // ← УДАЛЕНО
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
     connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
     connect(logoutBtn, &QPushButton::clicked, this, &StockInsight::logout);
-    connect(testBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
+    connect(showChartsBtn, &QPushButton::clicked, this, &StockInsight::showCharts);
     connect(saveBtn, &QPushButton::clicked, this, &StockInsight::saveJSON);
     connect(exportBtn, &QPushButton::clicked, this, &StockInsight::exportJPEG);
     connect(exportAllBtn, &QPushButton::clicked, this, &StockInsight::exportAllCharts);
@@ -1126,8 +1144,7 @@ void StockInsight::updateButtonsState()
     exportAllBtn->setEnabled(canExport);
 
     // Кнопка показа графиков
-    // testBtn — нужно будет переименовать в showChartsBtn позже
-    // пока оставляем как есть
+    showChartsBtn->setEnabled(hasData);
 
     // Кнопки, зависящие только от роли
     clearBtn->setEnabled(currentRole == "admin");

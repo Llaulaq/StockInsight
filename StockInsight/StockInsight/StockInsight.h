@@ -62,6 +62,7 @@ private:
     QPushButton* logoutBtn;                 // Выход из учётной записи
     QPushButton* refreshBtn;                // Обновление данных
     QPushButton* themeBtn;                  // Кнопка переключения темы
+    QPushButton* showChartsBtn;             // Кнопка "Показать графики"
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
     QComboBox* categoryFilter;              // Выпадающий список для фильтра по категории
