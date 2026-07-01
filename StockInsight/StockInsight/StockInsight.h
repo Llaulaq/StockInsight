@@ -39,7 +39,7 @@ private slots:
     void clearTable();                      // Очистка таблицы (только для администратора)
     void onSearchTextChanged(const QString& text);     // Поиск по таблице
     void logout();                          // Выход из учётной записи
-    void showCharts();                      // Показать графики
+    void showCharts();                      // Показать/удалить графики
     void saveJSON();                        // Сохранение данных в JSON (только видимые строки)
     void exportAllCharts();                 // Экспорт всех графиков в папку
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
@@ -61,7 +61,7 @@ private:
     QPushButton* logoutBtn;                 // Выход из учётной записи
     QPushButton* refreshBtn;                // Обновление данных
     QPushButton* themeBtn;                  // Кнопка переключения темы
-    QPushButton* showChartsBtn;             // Кнопка "Показать графики"
+    QPushButton* showChartsBtn;             // Кнопка "Показать графики" / "Удалить графики"
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
     QComboBox* categoryFilter;              // Выпадающий список для фильтра по категории
@@ -80,6 +80,7 @@ private:
     QVector<QString> rowColors;             // Сохраняет цвета строк для фильтрации
     bool isDarkTheme = true;                // Текущая тема: true — тёмная, false — светлая
     bool isTableCleared = false;            // Флаг: была ли таблица очищена
+    bool chartsVisible = false;             // Флаг: показаны ли графики
 
     // --- Вкладки и графики ---
     QTabWidget* tabs;                       // Вкладки для графиков

@@ -34,7 +34,7 @@
 
 // КОНСТРУКТОР
 StockInsight::StockInsight(QWidget* parent)
-    : QMainWindow(parent), currentCsvPath(""), isTableCleared(false)
+    : QMainWindow(parent), currentCsvPath(""), isTableCleared(false), chartsVisible(false)
 {
     QWidget* central = new QWidget(this);
     setCentralWidget(central);
@@ -449,27 +449,41 @@ void StockInsight::loadChartsToTabs()
         }
         chartLayouts[i]->addWidget(label);
     }
+
+    chartsVisible = true;
+    showChartsBtn->setText("🗑️ Удалить графики");
+    showChartsBtn->setToolTip("Удалить графики из вкладок");
 }
 
-// КНОПКА "ПОКАЗАТЬ ГРАФИКИ"
+// КНОПКА "ПОКАЗАТЬ ГРАФИКИ" / "УДАЛИТЬ ГРАФИКИ"
 void StockInsight::showCharts()
 {
+    // Если графики уже показаны — удаляем их
+    if (chartsVisible) {
+        // Очищаем все вкладки
+        for (int i = 0; i < chartLayouts.size(); ++i) {
+            QLayout* layout = chartLayouts[i];
+            QLayoutItem* item;
+            while ((item = layout->takeAt(0)) != nullptr) {
+                delete item->widget();
+                delete item;
+            }
+        }
+
+        chartsVisible = false;
+        showChartsBtn->setText("📈 Показать графики");
+        showChartsBtn->setToolTip("Сгенерировать и показать графики");
+        return;
+    }
+
     // Проверяем, есть ли данные и не очищена ли таблица
     if (currentProducts.isEmpty() || isTableCleared) {
         QMessageBox::warning(this, "Ошибка", "Нет данных для построения графиков! Сначала загрузите данные.");
         return;
     }
 
-    if (!currentProducts.isEmpty()) {
-        loadChartsFromAnalytics();
-        return;
-    }
-
-    if (currentCsvPath.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Сначала загрузите CSV-файл!");
-        return;
-    }
-    runPythonScript(currentCsvPath);
+    // Если данные есть — строим графики
+    loadChartsFromAnalytics();
 }
 
 // ФИЛЬТР ПО КАТЕГОРИИ
@@ -1167,7 +1181,7 @@ void StockInsight::updateButtonsState()
     bool canExport = hasData && (currentRole == "admin" || currentRole == "analyst");
     exportAllBtn->setEnabled(canExport);
 
-    // Кнопка показа графиков
+    // Кнопка показа/удаления графиков
     showChartsBtn->setEnabled(hasData);
 
     // Кнопки, зависящие только от роли
