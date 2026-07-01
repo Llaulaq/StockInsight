@@ -1,14 +1,15 @@
 #pragma once
-#include <QMainWindow>
-#include <QTableWidget>
-#include <QSplitter>
-#include <QPushButton>
-#include <QTabWidget>
+
+#include <QComboBox>
+#include <QLabel>
 #include <QLineEdit>
+#include <QMainWindow>
+#include <QPushButton>
+#include <QSplitter>
+#include <QTableWidget>
+#include <QTabWidget>
 #include <QVector>
 #include <QVBoxLayout>
-#include <QComboBox>          
-#include <QLabel>
 
 #include "models/Analytics.h"
 #include "models/Product.h"
@@ -39,7 +40,7 @@ private slots:
     void onSearchTextChanged(const QString& text);     // Поиск по таблице
     void logout();                          // Выход из учётной записи
     void showCharts();                      // Показать графики
-    void saveJSON();                        // Сохранение данных в JSON
+    void saveJSON();                        // Сохранение данных в JSON (только видимые строки)
     void exportJPEG();                      // Экспорт текущего графика в JPEG
     void exportAllCharts();                 // Экспорт всех графиков в папку
     void refreshData();                     // Обновить данные из CSV-файлов (только для администратора)
@@ -47,8 +48,6 @@ private slots:
     void onChartClicked();                  // Обработчик клика по графику (открытие в отдельном окне)
     void onTabChanged(int index);           // Установка курсора при смене вкладки
     void onHeaderClicked(int column);       // Сортировка по клику на заголовок
-
-private slots:
     void filterByCategory(int index);       // Фильтр таблицы по категории
     void filterByColor(int index);          // Фильтр таблицы по цвету строк
 
@@ -56,7 +55,7 @@ private:
     // --- Виджеты интерфейса ---
     QTableWidget* table;                    // Таблица для отображения товаров
     QPushButton* loadBtn;                   // Кнопка загрузки CSV (не используется)
-    QPushButton* saveBtn;                   // Сохранение JSON
+    QPushButton* saveBtn;                   // Сохранение JSON (над таблицей)
     QPushButton* exportBtn;                 // Экспорт JPEG
     QPushButton* exportAllBtn;              // Экспорт всех графиков
     QPushButton* clearBtn;                  // Очистка таблицы
@@ -96,5 +95,7 @@ private:
     void loadChartsFromAnalytics();         // Строит графики из данных Analytics
     void saveThemeToFile(const QString& theme);     // Сохраняет тему пользователя в users.json
     void updateStatistics();                // Обновляет панель статистики
+    void updateButtonsState();              // Обновляет состояние кнопок (активна/неактивна)
     void applyFilters();                    // Применение всех фильтров
+    QVector<Product> getVisibleProducts() const;  // Получить только видимые товары (с учётом фильтров)
 };

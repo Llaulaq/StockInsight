@@ -1,34 +1,35 @@
 #include "StockInsight.h"
-#include <QProcess>
-#include <QDebug>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QTableWidget>
-#include <QTabWidget>
-#include <QLabel>
-#include <QLineEdit>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QFile>
-#include <QTextStream>
-#include <QPixmap>
+
+#include <QComboBox>
 #include <QCoreApplication>
+#include <QDebug>
+#include <QDialog>
+#include <QFile>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QHBoxLayout>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
-#include <QSplitter>          
-#include <QComboBox>                        
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QMouseEvent>
-#include <QDialog>
-#include <QHeaderView>
+#include <QPixmap>
+#include <QProcess>
+#include <QPushButton>
 #include <QSet>
+#include <QSplitter>
+#include <QTableWidget>
+#include <QTabWidget>
+#include <QTextStream>
+#include <QVBoxLayout>
 
-#include "models/Product.h"
 #include "models/Analytics.h"
+#include "models/Product.h"
+#include "services/AnalyticsEngine.h"
 #include "services/CsvParser.h"
 #include "services/DataMerger.h"
-#include "services/AnalyticsEngine.h"
 
 // КОНСТРУКТОР
 StockInsight::StockInsight(QWidget* parent)
@@ -132,7 +133,7 @@ StockInsight::StockInsight(QWidget* parent)
     table->setAlternatingRowColors(true);
     table->setMouseTracking(true);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    
+
     // Подключаем сортировку по клику на заголовок
     connect(table->horizontalHeader(), &QHeaderView::sectionClicked, this, &StockInsight::onHeaderClicked);
 
@@ -211,6 +212,7 @@ StockInsight::StockInsight(QWidget* parent)
 
     // Обновляем статистику при запуске
     updateStatistics();
+    updateButtonsState();
 }
 
 // ЗАГРУЗКА CSV (оставлена для совместимости, но не используется)
@@ -304,31 +306,7 @@ void StockInsight::loadCSV()
 void StockInsight::setUserRole(const QString& role)
 {
     currentRole = role;
-
-    if (role == "admin") {
-        // loadBtn->setEnabled(true);
-        saveBtn->setEnabled(true);
-        exportBtn->setEnabled(true);
-        exportAllBtn->setEnabled(true);
-        clearBtn->setEnabled(true);
-        refreshBtn->setEnabled(true);
-    }
-    else if (role == "analyst") {
-        // loadBtn->setEnabled(true);
-        saveBtn->setEnabled(true);
-        exportBtn->setEnabled(true);
-        exportAllBtn->setEnabled(true);
-        clearBtn->setEnabled(false);
-        refreshBtn->setEnabled(false);
-    }
-    else if (role == "guest") {
-        // loadBtn->setEnabled(false);
-        saveBtn->setEnabled(false);
-        exportBtn->setEnabled(false);
-        exportAllBtn->setEnabled(false);
-        clearBtn->setEnabled(false);
-        refreshBtn->setEnabled(false);
-    }
+    updateButtonsState();
 }
 
 // ОЧИСТКА ТАБЛИЦЫ (только для админа)
@@ -344,7 +322,8 @@ void StockInsight::clearTable()
     table->setRowCount(0);
     rowColors.clear();
     isTableCleared = true;   // ← запоминаем, что таблица очищена
-    updateStatistics();  // Обновляем статистику
+    updateStatistics();      // Обновляем статистику
+    updateButtonsState();
     QMessageBox::information(this, "Готово", "Таблица очищена!");
 }
 
@@ -355,6 +334,7 @@ void StockInsight::onSearchTextChanged(const QString& text)
         for (int row = 0; row < table->rowCount(); ++row) {
             table->setRowHidden(row, false);
         }
+        updateButtonsState();
         return;
     }
 
@@ -372,12 +352,13 @@ void StockInsight::onSearchTextChanged(const QString& text)
         // Скрываем или показываем строку
         table->setRowHidden(row, !isMatch);
     }
+    updateButtonsState();
 }
 
 // ЗАПУСК PYTHON-СКРИПТА
 void StockInsight::runPythonScript(const QString& csvPath)
 {
-    QString pythonExe = "python";
+    QString pythonExe = QCoreApplication::applicationDirPath() + "/python.exe";
     QString scriptPath = QCoreApplication::applicationDirPath() + "/generate_charts.py";
 
     QProcess process;
@@ -464,12 +445,14 @@ void StockInsight::showCharts()
 void StockInsight::filterByCategory(int index)
 {
     applyFilters();
+    updateButtonsState();
 }
 
 // ФИЛЬТР ПО ЦВЕТУ
 void StockInsight::filterByColor(int index)
 {
     applyFilters();
+    updateButtonsState();
 }
 
 // ПРИМЕНЕНИЕ ВСЕХ ФИЛЬТРОВ
@@ -516,18 +499,23 @@ void StockInsight::applyFilters()
 // СОХРАНЕНИЕ ДАННЫХ В JSON
 void StockInsight::saveJSON()
 {
-    if (currentProducts.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Нет данных для сохранения! Сначала загрузите CSV.");
+    // Получаем только видимые товары
+    QVector<Product> visibleProducts = getVisibleProducts();
+
+    if (visibleProducts.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для сохранения! Таблица пуста или все строки скрыты фильтром.");
         return;
     }
 
     QString filePath = QFileDialog::getSaveFileName(this, "Сохранить JSON", "analytics.json", "JSON файлы (*.json)");
     if (filePath.isEmpty()) return;
 
+    // Заново рассчитываем аналитику только для видимых товаров
+    Analytics visibleAnalytics = AnalyticsEngine::calculate(visibleProducts);
+
     QJsonArray productsArray;
 
-    // --- Товары из currentProducts ---
-    for (const Product& p : currentProducts) {
+    for (const Product& p : visibleProducts) {
         QJsonObject product;
         product["name"] = p.name;
         product["category"] = p.category;
@@ -548,30 +536,30 @@ void StockInsight::saveJSON()
         productsArray.append(product);
     }
 
-    // --- Сводка из currentAnalytics ---
+    // --- Сводка из visibleAnalytics ---
     QJsonObject summary;
-    summary["total_potential_profit"] = currentAnalytics.totalPotentialProfit;
-    summary["frozen_money"] = currentAnalytics.frozenMoney;
-    summary["defisit_risk_count"] = currentAnalytics.deficitRiskCount;
-    summary["stale_count"] = currentAnalytics.staleCount;
+    summary["total_potential_profit"] = visibleAnalytics.totalPotentialProfit;
+    summary["frozen_money"] = visibleAnalytics.frozenMoney;
+    summary["defisit_risk_count"] = visibleAnalytics.deficitRiskCount;
+    summary["stale_count"] = visibleAnalytics.staleCount;
 
     // --- Данные для графиков ---
     QJsonObject chartsData;
 
     QJsonObject stockCat;
-    for (auto it = currentAnalytics.stockByCategory.begin(); it != currentAnalytics.stockByCategory.end(); ++it) {
+    for (auto it = visibleAnalytics.stockByCategory.begin(); it != visibleAnalytics.stockByCategory.end(); ++it) {
         stockCat[it.key()] = it.value();
     }
     chartsData["stock_by_category"] = stockCat;
 
     QJsonObject profitCat;
-    for (auto it = currentAnalytics.profitByCategory.begin(); it != currentAnalytics.profitByCategory.end(); ++it) {
+    for (auto it = visibleAnalytics.profitByCategory.begin(); it != visibleAnalytics.profitByCategory.end(); ++it) {
         profitCat[it.key()] = it.value();
     }
     chartsData["profit_by_category"] = profitCat;
 
     QJsonObject salesMonth;
-    for (auto it = currentAnalytics.salesByMonth.begin(); it != currentAnalytics.salesByMonth.end(); ++it) {
+    for (auto it = visibleAnalytics.salesByMonth.begin(); it != visibleAnalytics.salesByMonth.end(); ++it) {
         QJsonArray arr;
         for (int s : it.value()) {
             arr.append(s);
@@ -601,8 +589,8 @@ void StockInsight::saveJSON()
 void StockInsight::exportJPEG()
 {
     // Проверяем, есть ли данные
-    if (currentProducts.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта! Сначала загрузите CSV.");
+    if (currentProducts.isEmpty() || isTableCleared) {
+        QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта!");
         return;
     }
 
@@ -647,7 +635,7 @@ void StockInsight::exportJPEG()
 void StockInsight::exportAllCharts()
 {
     // Проверяем, есть ли данные
-    if (currentProducts.isEmpty()) {
+    if (currentProducts.isEmpty() || isTableCleared) {
         QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта!");
         return;
     }
@@ -816,11 +804,12 @@ void StockInsight::setAnalytics(const Analytics& data, const QVector<Product>& p
     table->viewport()->update();
     table->resizeColumnsToContents();
 
-    // Обновляем статистику
+    // Обновляем статистику и состояние кнопок
     updateStatistics();
+    updateButtonsState();
 }
 
-// ОБНОВЛЕНИЕ ДАННЫХ 
+// ОБНОВЛЕНИЕ ДАННЫХ
 void StockInsight::refreshData()
 {
     // Проверяем роль
@@ -1120,6 +1109,50 @@ void StockInsight::updateStatistics()
     frozenMoneyLabel->setText("❄️ Заморожено: " + QString::number(frozenMoney, 'f', 0) + " ₽");
     deficitCountLabel->setText("🔴 Дефицит: " + QString::number(deficit));
     staleCountLabel->setText("🟠 Залежалые: " + QString::number(stale));
+}
+
+// ОБНОВЛЕНИЕ СОСТОЯНИЯ КНОПОК
+void StockInsight::updateButtonsState()
+{
+    bool hasData = !currentProducts.isEmpty() && !isTableCleared;
+    bool hasVisibleData = !getVisibleProducts().isEmpty();
+
+    // Кнопка сохранения JSON (над таблицей)
+    saveBtn->setEnabled(hasVisibleData);
+
+    // Кнопки экспорта графиков
+    bool canExport = hasData && (currentRole == "admin" || currentRole == "analyst");
+    exportBtn->setEnabled(canExport);
+    exportAllBtn->setEnabled(canExport);
+
+    // Кнопка показа графиков
+    // testBtn — нужно будет переименовать в showChartsBtn позже
+    // пока оставляем как есть
+
+    // Кнопки, зависящие только от роли
+    clearBtn->setEnabled(currentRole == "admin");
+    refreshBtn->setEnabled(currentRole == "admin");
+}
+
+// ПОЛУЧЕНИЕ ТОЛЬКО ВИДИМЫХ ТОВАРОВ
+QVector<Product> StockInsight::getVisibleProducts() const
+{
+    QVector<Product> visibleProducts;
+
+    // Если данных нет или таблица очищена — возвращаем пустой вектор
+    if (currentProducts.isEmpty() || isTableCleared) {
+        return visibleProducts;
+    }
+
+    // Проходим по всем строкам таблицы
+    for (int row = 0; row < table->rowCount(); ++row) {
+        // Если строка не скрыта фильтром/поиском — добавляем товар
+        if (!table->isRowHidden(row) && row < currentProducts.size()) {
+            visibleProducts.append(currentProducts[row]);
+        }
+    }
+
+    return visibleProducts;
 }
 
 // СОРТИРОВКА ПО КЛИКУ НА ЗАГОЛОВОК
