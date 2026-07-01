@@ -76,12 +76,8 @@ StockInsight::StockInsight(QWidget* parent)
 
     mainLayout->addLayout(statsLayout);
 
-    // --- Верхняя панель ---
-    QHBoxLayout* buttonLayout = new QHBoxLayout();
-
-    resetFiltersBtn = new QPushButton("🔄 Сбросить фильтры");
-    resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
-    resetFiltersBtn->setMaximumWidth(150);
+    // --- Верхняя панель (строка 1: основные кнопки) ---
+    QHBoxLayout* topButtonLayout = new QHBoxLayout();
 
     exportAllBtn = new QPushButton("📦 Экспорт всех графиков");
     exportAllBtn->setToolTip("Сохранить все графики в выбранную папку");
@@ -101,35 +97,54 @@ StockInsight::StockInsight(QWidget* parent)
     themeBtn = new QPushButton("🌙 Тёмная");
     themeBtn->setToolTip("Переключить тему (светлая/тёмная)");
 
-    searchEdit = new QLineEdit();
-    searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
-    searchEdit->setToolTip("Введите текст для поиска по названию товара");
+    topButtonLayout->addWidget(exportAllBtn);
+    topButtonLayout->addWidget(clearBtn);
+    topButtonLayout->addWidget(showChartsBtn);
+    topButtonLayout->addWidget(refreshBtn);
+    topButtonLayout->addWidget(logoutBtn);
+    topButtonLayout->addWidget(themeBtn);
+    topButtonLayout->addStretch();
 
-    // --- Фильтр по категории ---
+    mainLayout->addLayout(topButtonLayout);
+
+    // --- Разделитель ---
+    QFrame* separatorLine = new QFrame();
+    separatorLine->setFrameShape(QFrame::HLine);
+    separatorLine->setFrameShadow(QFrame::Sunken);
+    mainLayout->addWidget(separatorLine);
+
+    // --- Верхняя панель (строка 2: фильтры + поиск + сброс) ---
+    QHBoxLayout* filterLayout = new QHBoxLayout();
+
+    // Фильтр по категории
     categoryFilter = new QComboBox();
     categoryFilter->addItem("Все категории");
     categoryFilter->setMaximumWidth(150);
     categoryFilter->setToolTip("Фильтр по категории");
 
-    // --- Фильтр по цвету ---
+    // Фильтр по цвету
     colorFilter = new QComboBox();
     colorFilter->addItems({ "Все товары", "⚠️ Дефицит", "⏳ Залежалые", "📦 Избыток", "✅ Норма" });
     colorFilter->setMaximumWidth(150);
     colorFilter->setToolTip("Фильтр по состоянию товара");
 
-    buttonLayout->addWidget(resetFiltersBtn);
-    buttonLayout->addWidget(exportAllBtn);
-    buttonLayout->addWidget(clearBtn);
-    buttonLayout->addWidget(showChartsBtn);
-    buttonLayout->addWidget(categoryFilter);
-    buttonLayout->addWidget(colorFilter);
-    buttonLayout->addWidget(refreshBtn);
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(searchEdit);
-    buttonLayout->addWidget(logoutBtn);
-    buttonLayout->addWidget(themeBtn);
+    // Кнопка сброса фильтров
+    resetFiltersBtn = new QPushButton("🔄 Сбросить фильтры");
+    resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
+    resetFiltersBtn->setMaximumWidth(150);
 
-    mainLayout->addLayout(buttonLayout);
+    // Поиск
+    searchEdit = new QLineEdit();
+    searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
+    searchEdit->setToolTip("Введите текст для поиска по названию товара");
+
+    filterLayout->addWidget(categoryFilter);
+    filterLayout->addWidget(colorFilter);
+    filterLayout->addWidget(resetFiltersBtn);
+    filterLayout->addWidget(searchEdit);
+    filterLayout->addStretch();
+
+    mainLayout->addLayout(filterLayout);
 
     // --- Заголовок таблицы с кнопкой сохранения ---
     QHBoxLayout* tableHeaderLayout = new QHBoxLayout();
@@ -1216,8 +1231,11 @@ void StockInsight::updateButtonsState()
     // Кнопка показа/удаления графиков — активна только если есть данные
     showChartsBtn->setEnabled(hasData);
 
-    // Кнопка сброса фильтров — активна всегда
-    resetFiltersBtn->setEnabled(true);
+    // Кнопка сброса фильтров — активна только если есть данные И применён хотя бы один фильтр
+    bool hasActiveFilters = (categoryFilter->currentIndex() != 0) ||
+        (colorFilter->currentIndex() != 0) ||
+        (!searchEdit->text().isEmpty());
+    resetFiltersBtn->setEnabled(hasData && hasActiveFilters);
 
     // Кнопки, зависящие только от роли
     clearBtn->setEnabled(currentRole == "admin");
