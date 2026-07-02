@@ -393,28 +393,8 @@ void StockInsight::clearTable()
 // ПОИСК ПО ТАБЛИЦЕ
 void StockInsight::onSearchTextChanged(const QString& text)
 {
-    if (text.isEmpty()) {
-        for (int row = 0; row < table->rowCount(); ++row) {
-            table->setRowHidden(row, false);
-        }
-        updateButtonsState();
-        return;
-    }
-
-    for (int row = 0; row < table->rowCount(); ++row) {
-        QTableWidgetItem* item = table->item(row, 0);
-        bool isMatch = false;
-
-        if (item) {
-            QString cellText = item->text();
-            if (cellText.contains(text, Qt::CaseInsensitive)) {
-                isMatch = true;
-            }
-        }
-
-        // Скрываем или показываем строку
-        table->setRowHidden(row, !isMatch);
-    }
+    // Просто вызываем applyFilters(), который применит все условия
+    applyFilters();
     updateButtonsState();
 }
 
@@ -593,19 +573,31 @@ void StockInsight::applyFilters()
 
     QString category = categoryFilter->currentText();
     QString color = colorFilter->currentText();
+    QString searchText = searchEdit->text();
 
     for (int row = 0; row < table->rowCount(); ++row) {
         bool show = true;
 
-        // Фильтр по категории
-        if (category != "Все категории") {
+        // УСЛОВИЕ 1: Поиск по названию
+        if (!searchText.isEmpty()) {
+            QTableWidgetItem* item = table->item(row, 0);
+            if (item) {
+                QString cellText = item->text();
+                if (!cellText.contains(searchText, Qt::CaseInsensitive)) {
+                    show = false;
+                }
+            }
+        }
+
+        // УСЛОВИЕ 2: Фильтр по категории
+        if (show && category != "Все категории") {
             QTableWidgetItem* item = table->item(row, 1);
             if (item) {
                 show = (item->text() == category);
             }
         }
 
-        // Фильтр по цвету
+        // УСЛОВИЕ 3: Фильтр по цвету (состоянию)
         if (show && color != "Все статусы" && color != "Показать все" && color != "Все товары") {
             if (color == "⚠️ Дефицит") {
                 show = (rowColors[row] == "deficit");
@@ -624,8 +616,16 @@ void StockInsight::applyFilters()
         table->setRowHidden(row, !show);
     }
 
-    // Обновляем график выбранных товаров при изменении фильтров
+    // Обновляем 5-й график, если он показан
     if (chartsVisible) {
+        QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(chartLayouts[4]);
+        if (layout) {
+            QLayoutItem* item;
+            while ((item = layout->takeAt(0)) != nullptr) {
+                delete item->widget();
+                delete item;
+            }
+        }
         loadSelectedCharts();
     }
 }

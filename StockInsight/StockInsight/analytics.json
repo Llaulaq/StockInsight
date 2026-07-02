@@ -1,18 +1,11 @@
 {
     "charts_data": {
         "profit_by_category": {
-            "Аудио": 4116700
+            "Мониторы": 591000,
+            "Периферия": 520600
         },
         "sales_by_month": {
-            "Наушники A4Tech": [
-                35,
-                40,
-                45,
-                50,
-                55,
-                45
-            ],
-            "Наушники Audio-Technica": [
+            "Монитор 24\" IPS": [
                 8,
                 10,
                 12,
@@ -20,115 +13,41 @@
                 18,
                 14
             ],
-            "Наушники Beyerdynamic": [
-                4,
+            "Монитор 27\" Dell": [
                 5,
+                3,
+                4,
                 6,
                 8,
-                10,
-                7
+                5
             ],
-            "Наушники HyperX": [
-                12,
-                15,
-                18,
+            "Мышь A4Tech X7": [
                 20,
-                22,
-                18
+                18,
+                25,
+                30,
+                35,
+                28
             ],
-            "Наушники JBL Tune": [
+            "Мышь Logitech G502": [
                 25,
                 30,
                 28,
                 35,
                 40,
                 32
-            ],
-            "Наушники Koss": [
-                8,
-                10,
-                12,
-                15,
-                18,
-                14
-            ],
-            "Наушники Logitech": [
-                25,
-                30,
-                35,
-                40,
-                45,
-                38
-            ],
-            "Наушники Meze": [
-                1,
-                2,
-                2,
-                3,
-                4,
-                3
-            ],
-            "Наушники Panasonic": [
-                18,
-                20,
-                22,
-                25,
-                30,
-                24
-            ],
-            "Наушники Sennheiser": [
-                2,
-                3,
-                4,
-                5,
-                6,
-                4
-            ],
-            "Наушники Sony WF": [
-                12,
-                15,
-                18,
-                20,
-                22,
-                18
-            ],
-            "Наушники Sony XM5": [
-                15,
-                18,
-                20,
-                22,
-                25,
-                20
             ]
         },
         "stock_by_category": {
-            "Аудио": 1006
+            "Мониторы": 68,
+            "Периферия": 209
         }
     },
     "products": [
         {
-            "category": "Аудио",
-            "days_in_stock": 16,
-            "is_defisit": false,
-            "is_stale": false,
-            "monthly_sales": [
-                15,
-                18,
-                20,
-                22,
-                25,
-                20
-            ],
-            "name": "Наушники Sony XM5",
-            "purchase_price": 18000,
-            "quantity": 67,
-            "sale_price": 28000,
-            "total_profit": 670000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 42,
-            "is_defisit": false,
+            "category": "Периферия",
+            "days_in_stock": 4,
+            "is_deficit": false,
             "is_stale": false,
             "monthly_sales": [
                 25,
@@ -138,93 +57,55 @@
                 40,
                 32
             ],
-            "name": "Наушники JBL Tune",
-            "purchase_price": 3500,
-            "quantity": 156,
+            "name": "Мышь Logitech G502",
+            "purchase_price": 3200,
+            "quantity": 120,
             "sale_price": 6500,
-            "total_profit": 468000
+            "total_profit": 396000
         },
         {
-            "category": "Аудио",
-            "days_in_stock": 64,
-            "is_defisit": false,
+            "category": "Мониторы",
+            "days_in_stock": 12,
+            "is_deficit": false,
             "is_stale": false,
             "monthly_sales": [
-                12,
-                15,
-                18,
-                20,
-                22,
-                18
+                5,
+                3,
+                4,
+                6,
+                8,
+                5
             ],
-            "name": "Наушники HyperX",
-            "purchase_price": 7500,
-            "quantity": 78,
-            "sale_price": 13000,
-            "total_profit": 429000
+            "name": "Монитор 27\" Dell",
+            "purchase_price": 22000,
+            "quantity": 23,
+            "sale_price": 34000,
+            "total_profit": 276000
         },
         {
-            "category": "Аудио",
-            "days_in_stock": 87,
-            "is_defisit": false,
+            "category": "Периферия",
+            "days_in_stock": 58,
+            "is_deficit": false,
             "is_stale": false,
             "monthly_sales": [
-                35,
-                40,
-                45,
-                50,
-                55,
-                45
-            ],
-            "name": "Наушники A4Tech",
-            "purchase_price": 1500,
-            "quantity": 234,
-            "sale_price": 2800,
-            "total_profit": 304200
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 108,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
-                12,
-                15,
-                18,
                 20,
-                22,
-                18
-            ],
-            "name": "Наушники Sony WF",
-            "purchase_price": 10000,
-            "quantity": 89,
-            "sale_price": 16000,
-            "total_profit": 534000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 131,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
+                18,
                 25,
                 30,
                 35,
-                40,
-                45,
-                38
+                28
             ],
-            "name": "Наушники Logitech",
-            "purchase_price": 4000,
-            "quantity": 145,
-            "sale_price": 7500,
-            "total_profit": 507500
+            "name": "Мышь A4Tech X7",
+            "purchase_price": 1800,
+            "quantity": 89,
+            "sale_price": 3200,
+            "total_profit": 124600
         },
         {
-            "category": "Аудио",
-            "days_in_stock": 154,
-            "is_defisit": false,
-            "is_stale": true,
+            "category": "Мониторы",
+            "days_in_stock": 62,
+            "is_deficit": false,
+            "is_stale": false,
             "monthly_sales": [
                 8,
                 10,
@@ -233,112 +114,17 @@
                 18,
                 14
             ],
-            "name": "Наушники Audio-Technica",
+            "name": "Монитор 24\" IPS",
             "purchase_price": 12000,
             "quantity": 45,
-            "sale_price": 20000,
-            "total_profit": 360000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 177,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
-                4,
-                5,
-                6,
-                8,
-                10,
-                7
-            ],
-            "name": "Наушники Beyerdynamic",
-            "purchase_price": 15000,
-            "quantity": 23,
-            "sale_price": 25000,
-            "total_profit": 230000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 198,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
-                1,
-                2,
-                2,
-                3,
-                4,
-                3
-            ],
-            "name": "Наушники Meze",
-            "purchase_price": 20000,
-            "quantity": 12,
-            "sale_price": 35000,
-            "total_profit": 180000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 218,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
-                8,
-                10,
-                12,
-                15,
-                18,
-                14
-            ],
-            "name": "Наушники Koss",
-            "purchase_price": 2500,
-            "quantity": 56,
-            "sale_price": 4500,
-            "total_profit": 112000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 242,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
-                2,
-                3,
-                4,
-                5,
-                6,
-                4
-            ],
-            "name": "Наушники Sennheiser",
-            "purchase_price": 18000,
-            "quantity": 12,
-            "sale_price": 30000,
-            "total_profit": 144000
-        },
-        {
-            "category": "Аудио",
-            "days_in_stock": 264,
-            "is_defisit": false,
-            "is_stale": true,
-            "monthly_sales": [
-                18,
-                20,
-                22,
-                25,
-                30,
-                24
-            ],
-            "name": "Наушники Panasonic",
-            "purchase_price": 2200,
-            "quantity": 89,
-            "sale_price": 4200,
-            "total_profit": 178000
+            "sale_price": 19000,
+            "total_profit": 315000
         }
     ],
     "summary": {
-        "defisit_risk_count": 0,
-        "frozen_money": 3146800,
-        "stale_count": 8,
-        "total_potential_profit": 4116700
+        "deficit_risk_count": 0,
+        "frozen_money": 0,
+        "stale_count": 0,
+        "total_potential_profit": 1111600
     }
 }

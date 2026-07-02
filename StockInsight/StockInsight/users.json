@@ -3,7 +3,7 @@
         {
             "password": "1234",
             "role": "admin",
-            "theme": "light",
+            "theme": "dark",
             "username": "admin"
         },
         {
@@ -33,7 +33,7 @@
         {
             "password": "1234",
             "role": "Гость",
-            "theme": "dark",
+            "theme": "light",
             "username": "dima"
         },
         {
@@ -47,6 +47,12 @@
             "role": "Админ",
             "theme": "dark",
             "username": "ot"
+        },
+        {
+            "password": "вф",
+            "role": "Аналитик",
+            "theme": "light",
+            "username": "вф"
         }
     ]
 }
