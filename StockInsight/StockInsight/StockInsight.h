@@ -67,6 +67,7 @@ private:
     QLineEdit* searchEdit;                  // Поле поиска по таблице
     QComboBox* colorFilter;                 // Выпадающий список для фильтра по цвету
     QComboBox* categoryFilter;              // Выпадающий список для фильтра по категории
+    QLabel* chartsPlaceholder;              // Заглушка для графиков
 
     // --- Виджеты статистики ---
     QLabel* totalProductsLabel;             // Всего товаров
@@ -83,10 +84,12 @@ private:
     bool isDarkTheme = true;                // Текущая тема: true — тёмная, false — светлая
     bool isTableCleared = false;            // Флаг: была ли таблица очищена
     bool chartsVisible = false;             // Флаг: показаны ли графики
+    bool isFirstChartLoad = true;           // Флаг: первая загрузка графиков (для 5-й вкладки)
 
     // --- Вкладки и графики ---
     QTabWidget* tabs;                       // Вкладки для графиков
     QVector<QVBoxLayout*> chartLayouts;     // Layout'ы для вкладок, чтобы добавлять картинки
+    QWidget* chartsWrapper;                 // Обёртка для вкладок с графиками
 
     // --- Данные от бэкенда ---
     Analytics currentAnalytics;             // Хранит аналитику от Димы

@@ -188,6 +188,12 @@ StockInsight::StockInsight(QWidget* parent)
     chartsWrapperLayout->setContentsMargins(0, 0, 0, 0);
     chartsWrapper->setMinimumHeight(150);
 
+    // --- ЗАГЛУШКА ДЛЯ ГРАФИКОВ ---
+    chartsPlaceholder = new QLabel("📈 Графики не созданы\n\nНажмите «Показать графики» для генерации");
+    chartsPlaceholder->setAlignment(Qt::AlignCenter);
+    chartsPlaceholder->setStyleSheet("font-size: 16px; color: #6c7086; padding: 50px;");
+    chartsWrapperLayout->addWidget(chartsPlaceholder);
+
     // --- Вкладки для графиков (с layout'ами для картинок) ---
     tabs = new QTabWidget();
     chartLayouts.clear();
@@ -201,6 +207,9 @@ StockInsight::StockInsight(QWidget* parent)
         chartLayouts.append(layout);
     }
     chartsWrapperLayout->addWidget(tabs);
+    
+    // Изначально вкладки скрыты, видна только заглушка
+    tabs->setVisible(false);
 
     // Подключаем сигнал смены вкладки для установки курсора
     connect(tabs, &QTabWidget::currentChanged, this, &StockInsight::onTabChanged);
@@ -367,6 +376,10 @@ void StockInsight::clearTable()
         chartsVisible = false;
         showChartsBtn->setText("📈 Показать графики");
         showChartsBtn->setToolTip("Сгенерировать и показать графики");
+        tabs->setVisible(false);
+        if (chartsPlaceholder) {
+            chartsPlaceholder->setVisible(true);
+        }
     }
 
     table->setRowCount(0);
@@ -435,6 +448,12 @@ void StockInsight::runPythonScript(const QString& csvPath)
 // ЗАГРУЗКА КАРТИНОК ВО ВКЛАДКИ С КНОПКОЙ СОХРАНЕНИЯ
 void StockInsight::loadChartsToTabs()
 {
+    // Скрываем заглушку, показываем вкладки
+    if (chartsPlaceholder) {
+        chartsPlaceholder->setVisible(false);
+    }
+    tabs->setVisible(true);
+
     // Очищаем старые виджеты во вкладках
     for (int i = 0; i < chartLayouts.size(); ++i) {
         QLayout* layout = chartLayouts[i];
@@ -489,15 +508,8 @@ void StockInsight::loadChartsToTabs()
 
     // --- 5-я вкладка: История выбранных ---
     if (chartLayouts.size() > 4) {
-        // Добавляем кнопку сохранения
-        QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
-        saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
-        chartLayouts[4]->addWidget(saveChartBtn, 0, Qt::AlignCenter);
-        connect(saveChartBtn, &QPushButton::clicked, this, [this]() {
-            exportCurrentChart(4);
-            });
-
-        // Загружаем график
+        // НЕ добавляем кнопку здесь! Она создаётся в loadSelectedCharts()
+        chartsVisible = true;
         loadSelectedCharts();
     }
 
@@ -526,6 +538,12 @@ void StockInsight::showCharts()
         chartsVisible = false;
         showChartsBtn->setText("📈 Показать графики");
         showChartsBtn->setToolTip("Сгенерировать и показать графики");
+
+        // Показываем заглушку, скрываем вкладки
+        if (chartsPlaceholder) {
+            chartsPlaceholder->setVisible(true);
+        }
+        tabs->setVisible(false);
 
         updateButtonsState();
         return;
