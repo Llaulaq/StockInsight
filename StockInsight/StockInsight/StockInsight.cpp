@@ -130,9 +130,9 @@ StockInsight::StockInsight(QWidget* parent)
     colorFilter->setToolTip("Фильтр по состоянию товара");
 
     // --- Кнопка сброса фильтров ---
-    resetFiltersBtn = new QPushButton("🔄 Сбросить фильтры");
+    resetFiltersBtn = new QPushButton("🔄 Сброс фильтров");
     resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
-    resetFiltersBtn->setMaximumWidth(150);
+    resetFiltersBtn->setMaximumWidth(170);
 
     // --- Поиск ---
     searchEdit = new QLineEdit();
