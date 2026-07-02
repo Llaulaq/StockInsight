@@ -96,6 +96,7 @@ private:
     void runPythonScript(const QString& csvPath);   // Запускает Python-скрипт для генерации графиков
     void loadChartsToTabs();                // Загружает готовые картинки графиков во вкладки
     void loadChartsFromAnalytics();         // Строит графики из данных Analytics
+    void loadSelectedCharts();              // Строит график по видимым товарам
     void saveThemeToFile(const QString& theme);     // Сохраняет тему пользователя в users.json
     void updateStatistics();                // Обновляет панель статистики
     void updateButtonsState();              // Обновляет состояние кнопок (активна/неактивна)

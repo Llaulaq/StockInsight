@@ -79,6 +79,7 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель (строка 1: основные кнопки) ---
     QHBoxLayout* topButtonLayout = new QHBoxLayout();
 
+    // loadBtn = new QPushButton("📂 Загрузить CSV");  // ← УДАЛЕНО (больше не нужно)
     exportAllBtn = new QPushButton("📦 Экспорт всех графиков");
     exportAllBtn->setToolTip("Сохранить все графики в выбранную папку");
 
@@ -116,24 +117,24 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель (строка 2: фильтры + поиск + сброс) ---
     QHBoxLayout* filterLayout = new QHBoxLayout();
 
-    // Фильтр по категории
+    // --- Фильтр по категории ---
     categoryFilter = new QComboBox();
     categoryFilter->addItem("Все категории");
     categoryFilter->setMaximumWidth(150);
     categoryFilter->setToolTip("Фильтр по категории");
 
-    // Фильтр по цвету
+    // --- Фильтр по цвету (выпадающий список) ---
     colorFilter = new QComboBox();
     colorFilter->addItems({ "Все товары", "⚠️ Дефицит", "⏳ Залежалые", "📦 Избыток", "✅ Норма" });
     colorFilter->setMaximumWidth(150);
     colorFilter->setToolTip("Фильтр по состоянию товара");
 
-    // Кнопка сброса фильтров
+    // --- Кнопка сброса фильтров ---
     resetFiltersBtn = new QPushButton("🔄 Сбросить фильтры");
     resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
     resetFiltersBtn->setMaximumWidth(150);
 
-    // Поиск
+    // --- Поиск ---
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText("🔍 Поиск по товарам...");
     searchEdit->setToolTip("Введите текст для поиска по названию товара");
@@ -152,7 +153,7 @@ StockInsight::StockInsight(QWidget* parent)
     QLabel* tableLabel = new QLabel("📋 Список товаров");
     saveBtn = new QPushButton("💾 Сохранить JSON");
     saveBtn->setToolTip("Сохранить данные из текущей таблицы в JSON-файл (с учётом фильтров)");
-    saveBtn->setEnabled(false);
+    saveBtn->setEnabled(false);  // Изначально неактивна
 
     tableHeaderLayout->addWidget(tableLabel);
     tableHeaderLayout->addStretch();
@@ -191,7 +192,7 @@ StockInsight::StockInsight(QWidget* parent)
     tabs = new QTabWidget();
     chartLayouts.clear();
 
-    QStringList tabNames = { "📊 Остатки", "💰 Прибыль", "📈 Продажи", "⚠️ Залежалые" };
+    QStringList tabNames = { "📊 Остатки", "💰 Прибыль", "📈 Продажи", "⚠️ Залежалые", "📊 История выбранных" };
     for (int i = 0; i < tabNames.size(); ++i) {
         QWidget* page = new QWidget();
         QVBoxLayout* layout = new QVBoxLayout(page);
@@ -231,6 +232,7 @@ StockInsight::StockInsight(QWidget* parent)
     }
 
     // --- Подключение сигналов к слотам ---
+    // connect(loadBtn, &QPushButton::clicked, this, &StockInsight::loadCSV);  // ← УДАЛЕНО
     connect(clearBtn, &QPushButton::clicked, this, &StockInsight::clearTable);
     connect(searchEdit, &QLineEdit::textChanged, this, &StockInsight::onSearchTextChanged);
     connect(logoutBtn, &QPushButton::clicked, this, &StockInsight::logout);
@@ -450,6 +452,7 @@ void StockInsight::loadChartsToTabs()
         "chart_stale_products.jpeg"
     };
 
+    // Первые 4 вкладки
     for (int i = 0; i < imageFiles.size() && i < chartLayouts.size(); ++i) {
         QString imagePath = "charts/" + imageFiles[i];
         QPixmap pixmap(imagePath);
@@ -458,10 +461,8 @@ void StockInsight::loadChartsToTabs()
         QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
         saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
 
-        // Добавляем кнопку в layout
         chartLayouts[i]->addWidget(saveChartBtn, 0, Qt::AlignCenter);
 
-        // Подключаем сигнал
         connect(saveChartBtn, &QPushButton::clicked, this, [this, i]() {
             exportCurrentChart(i);
             });
@@ -484,6 +485,20 @@ void StockInsight::loadChartsToTabs()
             label->setText("График не найден: " + imagePath);
         }
         chartLayouts[i]->addWidget(label);
+    }
+
+    // --- 5-я вкладка: История выбранных ---
+    if (chartLayouts.size() > 4) {
+        // Добавляем кнопку сохранения
+        QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
+        saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
+        chartLayouts[4]->addWidget(saveChartBtn, 0, Qt::AlignCenter);
+        connect(saveChartBtn, &QPushButton::clicked, this, [this]() {
+            exportCurrentChart(4);
+            });
+
+        // Загружаем график
+        loadSelectedCharts();
     }
 
     chartsVisible = true;
@@ -586,6 +601,11 @@ void StockInsight::applyFilters()
 
         table->setRowHidden(row, !show);
     }
+
+    // Обновляем график выбранных товаров при изменении фильтров
+    if (chartsVisible) {
+        loadSelectedCharts();
+    }
 }
 
 // СОХРАНЕНИЕ ДАННЫХ В JSON
@@ -607,6 +627,7 @@ void StockInsight::saveJSON()
 
     QJsonArray productsArray;
 
+    // --- Товары из visibleProducts ---
     for (const Product& p : visibleProducts) {
         QJsonObject product;
         product["name"] = p.name;
@@ -680,6 +701,7 @@ void StockInsight::saveJSON()
 // ЭКСПОРТ ТЕКУЩЕГО ГРАФИКА
 void StockInsight::exportCurrentChart(int index)
 {
+    // Проверяем, есть ли данные
     if (currentProducts.isEmpty() || isTableCleared) {
         QMessageBox::warning(this, "Ошибка", "Нет данных для экспорта!");
         return;
@@ -940,8 +962,8 @@ void StockInsight::refreshData()
     setAnalytics(analytics, products);
     table->resizeColumnsToContents();
 
-    // Если графики были показаны — пересоздаём их
-    if (chartsVisible) {
+    // Если есть данные — обновляем графики
+    if (!products.isEmpty()) {
         loadChartsFromAnalytics();
     }
 
@@ -978,6 +1000,117 @@ void StockInsight::loadChartsFromAnalytics()
     }
 
     runPythonScript("temp_data.csv");
+}
+
+// СТРОИТ ГРАФИК ПО ВИДИМЫМ ТОВАРАМ
+void StockInsight::loadSelectedCharts()
+{
+    QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(chartLayouts[4]);
+    if (!layout) return;
+
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+
+    // --- КНОПКА СОХРАНЕНИЯ (как на других вкладках) ---
+    QHBoxLayout* btnLayout = new QHBoxLayout();
+    QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
+    saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
+    btnLayout->addStretch();
+    btnLayout->addWidget(saveChartBtn);
+    btnLayout->addStretch();
+    layout->addLayout(btnLayout);
+
+    connect(saveChartBtn, &QPushButton::clicked, this, [this]() {
+        exportCurrentChart(4);
+        });
+
+    // Проверяем, все ли товары видны
+    bool allVisible = (table->rowCount() == currentProducts.size());
+    for (int row = 0; row < table->rowCount(); ++row) {
+        if (table->isRowHidden(row)) {
+            allVisible = false;
+            break;
+        }
+    }
+
+    QLabel* label = new QLabel();
+
+    // Если все товары видны И график продаж существует — используем его
+    if (allVisible && !currentProducts.isEmpty()) {
+        QString sourcePath = "charts/chart_monthly_sales.jpeg";
+        if (QFile::exists(sourcePath)) {
+            QPixmap pixmap(sourcePath);
+            if (!pixmap.isNull()) {
+                QWidget* parentWidget = layout->parentWidget();
+                int w = parentWidget->width() - 20;
+                int h = parentWidget->height() - 20;
+                if (w < 700) w = 700;
+                if (h < 500) h = 500;
+                label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                label->setAlignment(Qt::AlignCenter);
+                label->installEventFilter(this);
+                layout->addWidget(label);
+                return;
+            }
+        }
+    }
+
+    // Получаем видимые товары (с учётом фильтров и поиска)
+    QVector<Product> visibleProducts = getVisibleProducts();
+
+    if (visibleProducts.isEmpty()) {
+        label->setText("Нет данных для отображения");
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
+        return;
+    }
+
+    // Создаём временный CSV с видимыми товарами
+    QFile file("temp_selected_data.csv");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return;
+    }
+
+    QTextStream out(&file);
+    out << "Товар;Янв;Фев;Мар;Апр;Май;Июн\n";
+    for (const Product& p : visibleProducts) {
+        out << p.name << ";";
+        for (int i = 0; i < p.monthlySales.size(); ++i) {
+            out << p.monthlySales[i];
+            if (i < p.monthlySales.size() - 1) out << ";";
+        }
+        out << "\n";
+    }
+    file.close();
+
+    QString pythonExe = QCoreApplication::applicationDirPath() + "/python.exe";
+    if (!QFile::exists(pythonExe)) {
+        pythonExe = "python";
+    }
+    QString scriptPath = QCoreApplication::applicationDirPath() + "/generate_selected_charts.py";
+
+    QProcess process;
+    process.start(pythonExe, QStringList() << scriptPath << "temp_selected_data.csv");
+    process.waitForFinished();
+
+    QPixmap pixmap("charts/chart_selected_history.jpeg");
+    if (!pixmap.isNull()) {
+        QWidget* parentWidget = layout->parentWidget();
+        int w = parentWidget->width() - 20;
+        int h = parentWidget->height() - 20;
+        if (w < 700) w = 700;
+        if (h < 500) h = 500;
+        label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        label->setAlignment(Qt::AlignCenter);
+        label->installEventFilter(this);
+    }
+    else {
+        label->setText("График не найден: charts/chart_selected_history.jpeg");
+    }
+    layout->addWidget(label);
 }
 
 // УСТАНАВЛИВАЕТ ТЕМУ (dark/light)
@@ -1247,11 +1380,14 @@ QVector<Product> StockInsight::getVisibleProducts() const
 {
     QVector<Product> visibleProducts;
 
+    // Если данных нет или таблица очищена — возвращаем пустой вектор
     if (currentProducts.isEmpty() || isTableCleared) {
         return visibleProducts;
     }
 
+    // Проходим по всем строкам таблицы
     for (int row = 0; row < table->rowCount(); ++row) {
+        // Если строка не скрыта фильтром/поиском — добавляем товар
         if (!table->isRowHidden(row) && row < currentProducts.size()) {
             visibleProducts.append(currentProducts[row]);
         }
