@@ -192,7 +192,7 @@ StockInsight::StockInsight(QWidget* parent)
     tabs = new QTabWidget();
     chartLayouts.clear();
 
-    QStringList tabNames = { "📊 Остатки", "💰 Прибыль", "📈 Продажи", "⚠️ Залежалые", "📊 История выбранных" };
+    QStringList tabNames = { "📊 Остатки", "💰 Прибыль", "📈 Продажи", "⚠️ Залежалые", "📊 История выбранных товаров" };
     for (int i = 0; i < tabNames.size(); ++i) {
         QWidget* page = new QWidget();
         QVBoxLayout* layout = new QVBoxLayout(page);
@@ -504,6 +504,8 @@ void StockInsight::loadChartsToTabs()
     chartsVisible = true;
     showChartsBtn->setText("🗑️ Удалить графики");
     showChartsBtn->setToolTip("Удалить графики из вкладок");
+
+    updateButtonsState();
 }
 
 // КНОПКА "ПОКАЗАТЬ ГРАФИКИ" / "УДАЛИТЬ ГРАФИКИ"
@@ -761,7 +763,8 @@ void StockInsight::exportAllCharts()
         "chart_stock_by_category.jpeg",
         "chart_profit_by_category.jpeg",
         "chart_monthly_sales.jpeg",
-        "chart_stale_products.jpeg"
+        "chart_stale_products.jpeg",
+        "chart_selected_history.jpeg"
     };
 
     // Проверяем, есть ли хотя бы один график
@@ -783,7 +786,8 @@ void StockInsight::exportAllCharts()
     QString dirPath = QFileDialog::getExistingDirectory(this, "Выберите папку для сохранения графиков");
     if (dirPath.isEmpty()) return;
 
-    QStringList tabNames = { "Остатки", "Прибыль", "Продажи", "Залежалые" };
+    // 5 названий для 5 графиков
+    QStringList tabNames = { "Остатки", "Прибыль", "Продажи", "Залежалые", "История_выбранных" };
     int saved = 0;
 
     for (int i = 0; i < imageFiles.size(); ++i) {
@@ -1015,13 +1019,9 @@ void StockInsight::loadSelectedCharts()
     }
 
     // --- КНОПКА СОХРАНЕНИЯ (как на других вкладках) ---
-    QHBoxLayout* btnLayout = new QHBoxLayout();
     QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
     saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
-    btnLayout->addStretch();
-    btnLayout->addWidget(saveChartBtn);
-    btnLayout->addStretch();
-    layout->addLayout(btnLayout);
+    layout->addWidget(saveChartBtn);
 
     connect(saveChartBtn, &QPushButton::clicked, this, [this]() {
         exportCurrentChart(4);
@@ -1044,6 +1044,9 @@ void StockInsight::loadSelectedCharts()
         if (QFile::exists(sourcePath)) {
             QPixmap pixmap(sourcePath);
             if (!pixmap.isNull()) {
+                // Сохраняем копию как chart_selected_history.jpeg
+                pixmap.save("charts/chart_selected_history.jpeg", "JPEG", 95);
+
                 QWidget* parentWidget = layout->parentWidget();
                 int w = parentWidget->width() - 20;
                 int h = parentWidget->height() - 20;
@@ -1357,9 +1360,17 @@ void StockInsight::updateButtonsState()
     // Кнопка сохранения JSON (над таблицей)
     saveBtn->setEnabled(hasVisibleData);
 
+    // Проверяем наличие графиков
+    bool hasCharts = false;
+    QDir chartsDir("charts");
+    if (chartsDir.exists()) {
+        QStringList chartFiles = chartsDir.entryList(QStringList() << "*.jpeg", QDir::Files);
+        hasCharts = !chartFiles.isEmpty();
+    }
+
     // Кнопки экспорта графиков
     bool canExport = hasData && (currentRole == "admin" || currentRole == "analyst");
-    exportAllBtn->setEnabled(canExport);
+    exportAllBtn->setEnabled(canExport && hasCharts);
 
     // Кнопка показа/удаления графиков — активна только если есть данные
     showChartsBtn->setEnabled(hasData);
