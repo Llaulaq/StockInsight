@@ -132,7 +132,7 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Кнопка сброса фильтров ---
     resetFiltersBtn = new QPushButton("🔄 Сброс фильтров");
     resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
-    resetFiltersBtn->setMaximumWidth(150);
+    resetFiltersBtn->setMaximumWidth(170);
 
     // --- Поиск ---
     searchEdit = new QLineEdit();
@@ -1018,10 +1018,16 @@ void StockInsight::loadSelectedCharts()
         delete item;
     }
 
-    // --- КНОПКА СОХРАНЕНИЯ (как на других вкладках) ---
+    // --- КНОПКА СОХРАНЕНИЯ (как на других вкладках, с ограничением ширины) ---
+    QHBoxLayout* btnLayout = new QHBoxLayout();
     QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
     saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
-    layout->addWidget(saveChartBtn);
+    saveChartBtn->setFixedWidth(155);
+
+    btnLayout->addStretch();
+    btnLayout->addWidget(saveChartBtn);
+    btnLayout->addStretch();
+    layout->addLayout(btnLayout);
 
     connect(saveChartBtn, &QPushButton::clicked, this, [this]() {
         exportCurrentChart(4);
@@ -1277,7 +1283,10 @@ void StockInsight::onChartClicked()
     QPixmap scaled = pixmap.scaled(880, 680, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     bigLabel->setPixmap(scaled);
     bigLabel->setAlignment(Qt::AlignCenter);
-    bigLabel->setStyleSheet("background-color: #1e1e2f;");
+
+    // Фон зависит от темы
+    QString bgColor = isDarkTheme ? "#1e1e2f" : "#f5f5f5";
+    bigLabel->setStyleSheet("background-color: " + bgColor + ";");
 
     dialogLayout->addWidget(bigLabel);
 
