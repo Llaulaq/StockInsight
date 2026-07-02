@@ -205,9 +205,14 @@ StockInsight::StockInsight(QWidget* parent)
         page->setLayout(layout);
         tabs->addTab(page, tabNames[i]);
         chartLayouts.append(layout);
+
+        // Сохраняем layout 5-й вкладки отдельно
+        if (i == 4) {
+            selectedLayout = layout;
+        }
     }
     chartsWrapperLayout->addWidget(tabs);
-    
+
     // Изначально вкладки скрыты, видна только заглушка
     tabs->setVisible(false);
 
@@ -365,6 +370,7 @@ void StockInsight::clearTable()
 
     // Удаляем графики, если они показаны
     if (chartsVisible) {
+        // Очищаем все вкладки
         for (int i = 0; i < chartLayouts.size(); ++i) {
             QLayout* layout = chartLayouts[i];
             QLayoutItem* item;
@@ -373,6 +379,11 @@ void StockInsight::clearTable()
                 delete item;
             }
         }
+
+        // Сбрасываем указатели на виджеты 5-й вкладки
+        selectedChartLabel = nullptr;
+        saveSelectedBtn = nullptr;
+
         chartsVisible = false;
         showChartsBtn->setText("📈 Показать графики");
         showChartsBtn->setToolTip("Сгенерировать и показать графики");
@@ -434,8 +445,8 @@ void StockInsight::loadChartsToTabs()
     }
     tabs->setVisible(true);
 
-    // Очищаем старые виджеты во вкладках
-    for (int i = 0; i < chartLayouts.size(); ++i) {
+    // Очищаем старые виджеты во вкладках (кроме 5-й, там будем пересоздавать только QLabel)
+    for (int i = 0; i < chartLayouts.size() - 1; ++i) {
         QLayout* layout = chartLayouts[i];
         QLayoutItem* item;
         while ((item = layout->takeAt(0)) != nullptr) {
@@ -486,11 +497,22 @@ void StockInsight::loadChartsToTabs()
         chartLayouts[i]->addWidget(label);
     }
 
-    // --- 5-я вкладка: История выбранных ---
-    if (chartLayouts.size() > 4) {
-        // НЕ добавляем кнопку здесь! Она создаётся в loadSelectedCharts()
+    // --- 5-я вкладка: История выбранных (создаём кнопку ОДИН РАЗ) ---
+    if (chartLayouts.size() > 4 && selectedLayout) {
+        // Проверяем, есть ли уже кнопка
+        if (!saveSelectedBtn) {
+            // Создаём кнопку сохранения для 5-й вкладки (ОДИН РАЗ)
+            saveSelectedBtn = new QPushButton("💾 Сохранить JPEG");
+            saveSelectedBtn->setToolTip("Сохранить этот график в JPEG-файл");
+            saveSelectedBtn->setMaximumWidth(170);
+            selectedLayout->addWidget(saveSelectedBtn, 0, Qt::AlignCenter);
+            connect(saveSelectedBtn, &QPushButton::clicked, this, [this]() {
+                exportCurrentChart(4);
+                });
+        }
+
         chartsVisible = true;
-        loadSelectedCharts();
+        loadSelectedCharts();  // Здесь будет создаваться/обновляться только QLabel
     }
 
     chartsVisible = true;
@@ -514,6 +536,10 @@ void StockInsight::showCharts()
                 delete item;
             }
         }
+
+        // Сбрасываем указатели на виджеты 5-й вкладки
+        selectedChartLabel = nullptr;
+        saveSelectedBtn = nullptr;
 
         chartsVisible = false;
         showChartsBtn->setText("📈 Показать графики");
@@ -618,15 +644,7 @@ void StockInsight::applyFilters()
 
     // Обновляем 5-й график, если он показан
     if (chartsVisible) {
-        QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(chartLayouts[4]);
-        if (layout) {
-            QLayoutItem* item;
-            while ((item = layout->takeAt(0)) != nullptr) {
-                delete item->widget();
-                delete item;
-            }
-        }
-        loadSelectedCharts();
+        loadSelectedCharts();  // Обновляем только график, кнопка не трогается
     }
 }
 
@@ -1030,33 +1048,16 @@ void StockInsight::loadChartsFromAnalytics()
 void StockInsight::loadSelectedCharts()
 {
     // Если графики не показаны — ничего не делаем
-    if (!chartsVisible) {
+    if (!chartsVisible || !selectedLayout) {
         return;
     }
 
-    QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(chartLayouts[4]);
-    if (!layout) return;
-
-    QLayoutItem* item;
-    while ((item = layout->takeAt(0)) != nullptr) {
-        delete item->widget();
-        delete item;
+    // Удаляем только QLabel с графиком (если есть)
+    if (selectedChartLabel) {
+        selectedLayout->removeWidget(selectedChartLabel);
+        delete selectedChartLabel;
+        selectedChartLabel = nullptr;
     }
-
-    // --- КНОПКА СОХРАНЕНИЯ (как на других вкладках, с ограничением ширины) ---
-    QHBoxLayout* btnLayout = new QHBoxLayout();
-    QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
-    saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
-    saveChartBtn->setMaximumWidth(170);
-
-    btnLayout->addStretch();
-    btnLayout->addWidget(saveChartBtn);
-    btnLayout->addStretch();
-    layout->addLayout(btnLayout);
-
-    connect(saveChartBtn, &QPushButton::clicked, this, [this]() {
-        exportCurrentChart(4);
-        });
 
     // Проверяем, все ли товары видны
     bool allVisible = (table->rowCount() == currentProducts.size());
@@ -1068,6 +1069,7 @@ void StockInsight::loadSelectedCharts()
     }
 
     QLabel* label = new QLabel();
+    selectedChartLabel = label;  // Сохраняем для последующего удаления
 
     // Если все товары видны И график продаж существует — используем его
     if (allVisible && !currentProducts.isEmpty()) {
@@ -1075,10 +1077,8 @@ void StockInsight::loadSelectedCharts()
         if (QFile::exists(sourcePath)) {
             QPixmap pixmap(sourcePath);
             if (!pixmap.isNull()) {
-                // Сохраняем копию как chart_selected_history.jpeg
                 pixmap.save("charts/chart_selected_history.jpeg", "JPEG", 95);
-
-                QWidget* parentWidget = layout->parentWidget();
+                QWidget* parentWidget = selectedLayout->parentWidget();
                 int w = parentWidget->width() - 20;
                 int h = parentWidget->height() - 20;
                 if (w < 700) w = 700;
@@ -1086,7 +1086,7 @@ void StockInsight::loadSelectedCharts()
                 label->setPixmap(pixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
                 label->setAlignment(Qt::AlignCenter);
                 label->installEventFilter(this);
-                layout->addWidget(label);
+                selectedLayout->addWidget(label);
                 return;
             }
         }
@@ -1098,7 +1098,7 @@ void StockInsight::loadSelectedCharts()
     if (visibleProducts.isEmpty()) {
         label->setText("Нет данных для отображения");
         label->setAlignment(Qt::AlignCenter);
-        layout->addWidget(label);
+        selectedLayout->addWidget(label);
         return;
     }
 
@@ -1132,7 +1132,7 @@ void StockInsight::loadSelectedCharts()
 
     QPixmap pixmap("charts/chart_selected_history.jpeg");
     if (!pixmap.isNull()) {
-        QWidget* parentWidget = layout->parentWidget();
+        QWidget* parentWidget = selectedLayout->parentWidget();
         int w = parentWidget->width() - 20;
         int h = parentWidget->height() - 20;
         if (w < 700) w = 700;
@@ -1144,7 +1144,7 @@ void StockInsight::loadSelectedCharts()
     else {
         label->setText("График не найден: charts/chart_selected_history.jpeg");
     }
-    layout->addWidget(label);
+    selectedLayout->addWidget(label);
 }
 
 // УСТАНАВЛИВАЕТ ТЕМУ (dark/light)
@@ -1239,11 +1239,7 @@ void StockInsight::toggleTheme()
     // Сохраняем тему в users.json
     saveThemeToFile(isDarkTheme ? "dark" : "light");
 
-    // Если таблица НЕ была очищена и есть данные — обновляем цвета
-    if (!isTableCleared && !currentProducts.isEmpty()) {
-        setAnalytics(currentAnalytics, currentProducts);
-    }
-
+    // Обновляем цвета в таблице
     updateTableColors();
 }
 

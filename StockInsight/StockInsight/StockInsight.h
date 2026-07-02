@@ -84,12 +84,14 @@ private:
     bool isDarkTheme = true;                // Текущая тема: true — тёмная, false — светлая
     bool isTableCleared = false;            // Флаг: была ли таблица очищена
     bool chartsVisible = false;             // Флаг: показаны ли графики
-    bool isFirstChartLoad = true;           // Флаг: первая загрузка графиков (для 5-й вкладки)
 
     // --- Вкладки и графики ---
     QTabWidget* tabs;                       // Вкладки для графиков
     QVector<QVBoxLayout*> chartLayouts;     // Layout'ы для вкладок, чтобы добавлять картинки
     QWidget* chartsWrapper;                 // Обёртка для вкладок с графиками
+    QVBoxLayout* selectedLayout = nullptr;  // Layout для 5-й вкладки (отдельно)
+    QPushButton* saveSelectedBtn = nullptr; // Кнопка сохранения для 5-й вкладки
+    QLabel* selectedChartLabel = nullptr;   // QLabel для графика в 5-й вкладке
 
     // --- Данные от бэкенда ---
     Analytics currentAnalytics;             // Хранит аналитику от Димы
