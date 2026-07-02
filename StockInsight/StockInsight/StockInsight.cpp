@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDialog>
+#include <QDir>
 #include <QFile>
 #include <QFileDialog>
 #include <QHeaderView>
@@ -79,15 +80,8 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Верхняя панель (строка 1: основные кнопки) ---
     QHBoxLayout* topButtonLayout = new QHBoxLayout();
 
-    // loadBtn = new QPushButton("📂 Загрузить CSV");  // ← УДАЛЕНО (больше не нужно)
     exportAllBtn = new QPushButton("📦 Экспорт всех графиков");
     exportAllBtn->setToolTip("Сохранить все графики в выбранную папку");
-
-    clearBtn = new QPushButton("🗑️ Очистить");
-    clearBtn->setToolTip("Очистить таблицу (только для администратора)");
-
-    logoutBtn = new QPushButton("🚪 Выйти");
-    logoutBtn->setToolTip("Выйти из учётной записи");
 
     showChartsBtn = new QPushButton("📈 Показать графики");
     showChartsBtn->setToolTip("Сгенерировать и показать графики");
@@ -95,13 +89,19 @@ StockInsight::StockInsight(QWidget* parent)
     refreshBtn = new QPushButton("🔄 Обновить данные");
     refreshBtn->setToolTip("Обновить данные из CSV-файлов (только для администратора)");
 
+    clearBtn = new QPushButton("🗑️ Очистить");
+    clearBtn->setToolTip("Очистить таблицу (только для администратора)");
+
+    logoutBtn = new QPushButton("🚪 Выйти");
+    logoutBtn->setToolTip("Выйти из учётной записи");
+
     themeBtn = new QPushButton("🌙 Тёмная");
     themeBtn->setToolTip("Переключить тему (светлая/тёмная)");
 
     topButtonLayout->addWidget(exportAllBtn);
-    topButtonLayout->addWidget(clearBtn);
     topButtonLayout->addWidget(showChartsBtn);
     topButtonLayout->addWidget(refreshBtn);
+    topButtonLayout->addWidget(clearBtn);
     topButtonLayout->addWidget(logoutBtn);
     topButtonLayout->addWidget(themeBtn);
     topButtonLayout->addStretch();
@@ -132,7 +132,7 @@ StockInsight::StockInsight(QWidget* parent)
     // --- Кнопка сброса фильтров ---
     resetFiltersBtn = new QPushButton("🔄 Сброс фильтров");
     resetFiltersBtn->setToolTip("Сбросить все фильтры и поиск");
-    resetFiltersBtn->setMaximumWidth(170);
+    resetFiltersBtn->setMaximumWidth(150);
 
     // --- Поиск ---
     searchEdit = new QLineEdit();
