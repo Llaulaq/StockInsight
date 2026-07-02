@@ -104,5 +104,6 @@ private:
     void updateStatistics();                // Обновляет панель статистики
     void updateButtonsState();              // Обновляет состояние кнопок (активна/неактивна)
     void applyFilters();                    // Применение всех фильтров
+    void updateTableColors();               // Обновляет цвета в таблице
     QVector<Product> getVisibleProducts() const;  // Получить только видимые товары (с учётом фильтров)
 };

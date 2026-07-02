@@ -1243,6 +1243,8 @@ void StockInsight::toggleTheme()
     if (!isTableCleared && !currentProducts.isEmpty()) {
         setAnalytics(currentAnalytics, currentProducts);
     }
+
+    updateTableColors();
 }
 
 // ВЫХОД ИЗ УЧЁТНОЙ ЗАПИСИ
@@ -1456,4 +1458,36 @@ void StockInsight::onHeaderClicked(int column)
     }
 
     table->sortItems(column, order);
+}
+
+// ОБНОВЛЕНИЕ ЦВЕТОВ В ТАБЛИЦЕ
+void StockInsight::updateTableColors()
+{
+    if (currentProducts.isEmpty() || isTableCleared) return;
+
+    QColor normalColor = isDarkTheme ? Qt::white : Qt::black;
+
+    for (int r = 0; r < table->rowCount(); ++r) {
+        QColor textColor;
+        if (rowColors[r] == "deficit") {
+            textColor = Qt::red;
+        }
+        else if (rowColors[r] == "stale") {
+            textColor = QColor(255, 165, 0);
+        }
+        else if (rowColors[r] == "green") {
+            textColor = Qt::darkGreen;
+        }
+        else {
+            textColor = normalColor;
+        }
+
+        for (int col = 0; col < table->columnCount(); ++col) {
+            QTableWidgetItem* item = table->item(r, col);
+            if (item) {
+                item->setForeground(textColor);
+            }
+        }
+    }
+    table->viewport()->update();
 }
