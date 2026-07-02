@@ -526,6 +526,8 @@ void StockInsight::showCharts()
         chartsVisible = false;
         showChartsBtn->setText("📈 Показать графики");
         showChartsBtn->setToolTip("Сгенерировать и показать графики");
+
+        updateButtonsState();
         return;
     }
 
@@ -1009,6 +1011,11 @@ void StockInsight::loadChartsFromAnalytics()
 // СТРОИТ ГРАФИК ПО ВИДИМЫМ ТОВАРАМ
 void StockInsight::loadSelectedCharts()
 {
+    // Если графики не показаны — ничего не делаем
+    if (!chartsVisible) {
+        return;
+    }
+
     QVBoxLayout* layout = qobject_cast<QVBoxLayout*>(chartLayouts[4]);
     if (!layout) return;
 
@@ -1022,7 +1029,7 @@ void StockInsight::loadSelectedCharts()
     QHBoxLayout* btnLayout = new QHBoxLayout();
     QPushButton* saveChartBtn = new QPushButton("💾 Сохранить JPEG");
     saveChartBtn->setToolTip("Сохранить этот график в JPEG-файл");
-    saveChartBtn->setFixedWidth(155);
+    saveChartBtn->setMaximumWidth(170);
 
     btnLayout->addStretch();
     btnLayout->addWidget(saveChartBtn);
